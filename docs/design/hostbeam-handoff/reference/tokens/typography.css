@@ -1,0 +1,71 @@
+/* ============================================================
+   Hostbeam — Typography tokens
+   Primary UI face is Geist (self-hosted, SIL OFL; @font-face in
+   tokens/fonts.css), with the macOS system stack as fallback.
+   Monospace is for paths, hotkeys, hosts.
+   ============================================================ */
+
+/* JetBrains Mono — fallback for SF Mono off-Mac. See readme
+   "Iconography & fonts" note: real app uses SF Mono (Apple). */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* --- Families -------------------------------------------- */
+  /* Geist (self-hosted, OFL) is the primary UI face; @font-face in
+     tokens/fonts.css. System faces follow as graceful fallbacks. */
+  --font-system: "Geist", -apple-system, BlinkMacSystemFont,
+                 "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono",
+               "Menlo", "Monaco", monospace;
+
+  /* --- Type scale (px) — compact macOS utility ------------- */
+  --text-largetitle: 26px;  /* first-run / empty hero only */
+  --text-title:      22px;  /* rare; setup step heads */
+  --text-title2:     17px;  /* popover section titles */
+  --text-title3:     15px;  /* prominent labels */
+  --text-headline:   13px;  /* emphasized body (semibold) */
+  --text-body:       13px;  /* default body / controls */
+  --text-callout:    12px;  /* secondary controls, meta */
+  --text-subhead:    11px;  /* labels above fields */
+  --text-footnote:   11px;  /* helper text */
+  --text-caption:    10px;  /* timestamps, tiny meta */
+
+  /* --- Weights -------------------------------------------- */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* --- Line heights --------------------------------------- */
+  --leading-tight:   1.2;
+  --leading-snug:    1.3;
+  --leading-normal:  1.45;
+
+  /* --- Letter spacing (SF is tightened at display sizes) --- */
+  --tracking-tight:  -0.02em;
+  --tracking-snug:   -0.01em;
+  --tracking-normal: 0em;
+  --tracking-wide:   0.02em;   /* small all-caps eyebrows */
+
+  /* --- Semantic text roles -------------------------------- */
+  --role-title-size:    var(--text-title2);
+  --role-title-weight:  var(--weight-semibold);
+  --role-body-size:     var(--text-body);
+  --role-label-size:    var(--text-subhead);
+  --role-mono-size:     12px;
+}
+
+/* Baseline page defaults — consumers get sensible text out of the box */
+body {
+  font-family: var(--font-system);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  color: var(--label);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv01";
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+}

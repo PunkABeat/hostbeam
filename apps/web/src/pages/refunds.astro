@@ -1,0 +1,49 @@
+---
+// Refund and cancellation policy. Written for ADR 0014's license, when Paddle's
+// domain review expected Terms, Privacy and a Refund Policy each reachable from
+// the navigation; /terms still links here. Licensing is retired (ADR 0031), so
+// the page now says what applies to a purchase made before that.
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.tsx";
+import Footer from "../components/Footer.astro";
+---
+
+<Base
+  title="Refunds · Hostbeam"
+  description="Hostbeam no longer sells anything. How a license bought before November 2026 is refunded."
+>
+  <div class="site" id="top">
+    <Nav />
+    <main class="wrap" style="max-width: 720px; padding-top: 64px; padding-bottom: 96px">
+      <p class="note">Refund and cancellation policy · last updated 8 November 2026</p>
+      <h1 class="h2" style="font-size: clamp(32px, 4.5vw, 48px)">
+        Nothing is sold, so there is nothing to refund.
+      </h1>
+      <p class="lede" style="margin-top: 20px">
+        Hostbeam is free: every feature, no limit, no reminder, on the Mac and the iPhone.
+        Licenses are no longer sold.
+      </p>
+
+      <section style="margin-top: 40px; display: flex; flex-direction: column; gap: 14px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">Bought a license before?</h2>
+        <p style="margin: 0; color: var(--ink-soft)">
+          Licenses were sold until November 2026 through
+          <a href="https://paddle.com" style="color: var(--beam)">Paddle</a>, the merchant of
+          record, under
+          <a href="https://www.paddle.com/legal/checkout-buyer-terms" style="color: var(--beam)">Paddle’s buyer terms</a>.
+          A key you activated keeps working, and the app has every feature either way, so a
+          refund changes nothing in the app. If you want one for a recent purchase, email
+          <a href="mailto:support@hostbeam.app" style="color: var(--beam)">support@hostbeam.app</a>
+          with the email you bought with or the receipt, or go through
+          <a href="https://paddle.net" style="color: var(--beam)">paddle.net</a> directly.
+          Refunds go back to the original payment method; Paddle processes them.
+        </p>
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 12px 0 0">The iPhone app</h2>
+        <p style="margin: 0; color: var(--ink-soft)">
+          Free, with nothing to buy inside it, so there is nothing to refund there either.
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>

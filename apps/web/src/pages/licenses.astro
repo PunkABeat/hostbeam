@@ -1,0 +1,106 @@
+---
+// The open-source notices behind all three of Hostbeam's surfaces, on one
+// page. The apps carry their own copies in-app (that is where the MIT and
+// Apache-2.0 obligation actually sits — on the binary); this page exists so
+// the answer to "what is this built on" is a link, not a download.
+//
+// Every list is generated: scripts/third-party-notices.mjs writes the three
+// JSON files from `cargo metadata`, the npm production trees and BeamEngine's
+// Package.resolved, and the release scripts refuse a stale one. Read at build
+// time, the way Footer.astro reads CHANGELOG.md.
+import macText from "../../../desktop/src/generated/third-party-notices.json?raw";
+import iphoneText from "../../../mobile/App/ThirdPartyNotices.json?raw";
+import websiteText from "../generated/third-party-notices.json?raw";
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.tsx";
+import Footer from "../components/Footer.astro";
+
+type Notices = {
+  packages: {
+    name: string;
+    version: string;
+    licenses: string[];
+    url: string;
+    copyright: string[];
+    notice?: string;
+  }[];
+  licenses: Record<string, string>;
+};
+
+const read = (text: string): Notices => JSON.parse(text);
+const sections = [
+  { id: "mac", title: "Hostbeam for Mac", notices: read(macText) },
+  { id: "iphone", title: "Hostbeam for iPhone", notices: read(iphoneText) },
+  { id: "website", title: "This website", notices: read(websiteText) },
+];
+// Each licence text once, whichever app it came from.
+const texts: Record<string, string> = {};
+for (const s of sections) Object.assign(texts, s.notices.licenses);
+const textIds = Object.keys(texts).sort();
+const total = sections.reduce((n, s) => n + s.notices.packages.length, 0);
+---
+
+<Base
+  title="Open source licenses · Hostbeam"
+  description="The open-source packages inside Hostbeam for Mac, Hostbeam for iPhone and this website, with their licenses and copyright notices."
+>
+  <div class="site" id="top">
+    <Nav />
+    <main class="wrap" style="max-width: 720px; padding-top: 64px; padding-bottom: 96px">
+      <p class="note">Open source licenses · {total} packages</p>
+      <h1 class="h2" style="font-size: clamp(32px, 4.5vw, 48px)">Built on other people's work.</h1>
+      <p class="lede" style="margin-top: 20px">
+        Hostbeam is a small product on top of a lot of open source: Tauri and the Rust crates
+        under it on the Mac, SwiftNIO and Citadel on the iPhone, Astro and React here. Each
+        package is listed with its license and copyright, and the license texts are at the
+        bottom. The same lists ship inside the apps, under Settings → About.
+      </p>
+
+      {
+        sections.map((s) => (
+          <section id={s.id} style="margin-top: 48px">
+            <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">
+              {s.title}
+              <span class="note" style="font-weight: 400; margin-left: 8px">{s.notices.packages.length} packages</span>
+            </h2>
+            <ul style="list-style: none; margin: 14px 0 0; padding: 0; font-size: 14px; line-height: 1.6; color: var(--ink-soft)">
+              {s.notices.packages.map((p) => (
+                <li style="margin: 0 0 8px">
+                  <a href={p.url} rel="noreferrer" style="color: var(--ink); text-decoration: none; font-weight: 500">
+                    {p.name}
+                  </a>{" "}
+                  <span class="note">
+                    {p.version} · {p.licenses.join(" and ")}
+                  </span>
+                  {p.copyright.map((c) => (
+                    <div class="note" style="font-size: 12.5px; word-break: break-word">{c}</div>
+                  ))}
+                  {p.notice ? (
+                    <pre style="margin: 4px 0 0; white-space: pre-wrap; word-break: break-word; font-size: 12px; color: var(--ink-faint)">{p.notice}</pre>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+
+      <section id="texts" style="margin-top: 48px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">License texts</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          Each license once, verbatim from the SPDX list. A package above is under the text of
+          the same name; a dual-licensed package is taken under the one shown.
+        </p>
+        {
+          textIds.map((id) => (
+            <details style="margin-top: 14px">
+              <summary style="cursor: pointer; font-weight: 500; color: var(--ink)">{id}</summary>
+              <pre style="margin: 10px 0 0; white-space: pre-wrap; word-break: break-word; font-size: 12.5px; line-height: 1.55; color: var(--ink-soft)">{texts[id]}</pre>
+            </details>
+          ))
+        }
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>

@@ -1,0 +1,29 @@
+---
+// A dedicated /pricing page.
+//
+// The homepage already carries this exact section at #pricing, and that anchor
+// stays. This page exists because Paddle's website verification asks for a
+// "pricing page" URL, and a bare fragment can read as "there isn't one" — the
+// difference between an approval and another 5-7 business day review cycle.
+//
+// It renders the same <Pricing /> and <Faq /> components as the homepage rather
+// than restating the plans, so the two can never drift into quoting different
+// prices — which is exactly the inconsistency a reviewer looks for.
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.tsx";
+import Pricing from "../components/Pricing.tsx";
+import Faq from "../components/Faq.tsx";
+import Footer from "../components/Footer.astro";
+---
+
+<Base
+  title="Pricing · Hostbeam"
+  description="Free to use, every feature, no limit. A $29 one-time license for up to 3 Macs hides the occasional reminder, with every Hostbeam 1 update included. No subscription, no account."
+>
+  <div class="site">
+    <Nav />
+    <Pricing />
+    <Faq />
+    <Footer />
+  </div>
+</Base>

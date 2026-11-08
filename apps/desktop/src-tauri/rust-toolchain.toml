@@ -1,0 +1,6 @@
+# One compiler for CI and every developer Mac (`rust-version` in Cargo.toml
+# says the same). Bump both together; `cargo clippy -D warnings` is the gate,
+# and a newer clippy brings new lints.
+[toolchain]
+channel = "1.93.0"
+components = ["rustfmt", "clippy"]

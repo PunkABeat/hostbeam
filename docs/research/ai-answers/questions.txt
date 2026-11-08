@@ -1,0 +1,5 @@
+A|How do I paste a screenshot into Claude Code when it's running on a remote server over SSH?
+B|What's the best way to send a screenshot from my Mac to a coding agent running on a remote server?
+C|How do I send a screenshot from my iPhone to Claude Code running on my server?
+D|Is there a Mac app that sends screenshots to Claude Code over SSH?
+E|How do I open a dev server running on a remote server in my Mac's browser when ssh -L says "administratively prohibited"?

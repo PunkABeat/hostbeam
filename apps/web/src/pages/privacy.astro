@@ -1,0 +1,108 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.tsx";
+import Footer from "../components/Footer.astro";
+---
+
+<Base
+  title="Privacy · Hostbeam"
+  description="What Hostbeam processes, what it never sees, and who touches what. The short version: what you beam goes from your device to your server over your own SSH. We never see it."
+>
+  <div class="site" id="top">
+    <Nav />
+    <main class="wrap" style="max-width: 720px; padding-top: 64px; padding-bottom: 96px">
+      <p class="note">Privacy policy · last updated 9 October 2026</p>
+      <h1 class="h2" style="font-size: clamp(32px, 4.5vw, 48px)">
+        What you beam never touches us.
+      </h1>
+      <p class="lede" style="margin-top: 20px">
+        Hostbeam moves the screenshots and files you hand it from your Mac or iPhone to your own
+        server over your own SSH.
+        That design is the privacy policy: the file goes straight from your device to your host,
+        and no Hostbeam system ever sees, stores, or relays it. This page lists the few things we
+        do process, and why.
+      </p>
+
+      <section style="margin-top: 48px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">What the apps never send</h2>
+        <ul style="margin: 14px 0 0; padding-left: 20px; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          <li>Your screenshots, photos and files. They travel over your SSH connection only.</li>
+          <li>Your SSH keys, config, hostnames, or credentials.</li>
+          <li>Usage analytics, crash reports, or telemetry of any kind. There is none.</li>
+          <li>Your beam count. The Mac counts beams to know when to show the license reminder, and the count stays there.</li>
+        </ul>
+      </section>
+
+      <section style="margin-top: 40px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">What is processed, and by whom</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          <b style="color: var(--ink)">License activation and checks.</b> When you activate a license, the Mac app sends your
+          license key, a device identifier (a random ID the app creates, not your Apple ID or
+          advertising ID), and a device name to our licensing service,
+          <a href="https://keygen.sh" style="color: var(--beam)">Keygen</a>. A licensed Mac
+          re-checks the key quietly about once a day. It exists so your license works on up to three
+          Macs, and for anyone without a license there is no request at all — the reminder is
+          decided on your Mac. The iPhone app has no license, so it makes no such request.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          <b style="color: var(--ink)">Device permissions.</b> The iPhone app asks for camera
+          access (only to scan the pairing QR from your Mac) and photo access (only to read the
+          screenshot you choose to beam). Both are used on your device, in the moment; nothing
+          from your camera or photo library is ever sent to us. The images and files you beam go
+          to your own server, over your own SSH, and nowhere else.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          <b style="color: var(--ink)">Purchases.</b> Checkout is handled by
+          <a href="https://paddle.com" style="color: var(--beam)">Paddle</a>, our merchant of
+          record: legally, Paddle is the seller, and Paddle is the data controller for your
+          payment and billing data, under
+          <a href="https://www.paddle.com/legal/privacy" style="color: var(--beam)">Paddle's privacy policy</a>.
+          We never see card numbers. We receive your email address and order details so we can
+          create your license and email you the key
+          (delivery via <a href="https://resend.com" style="color: var(--beam)">Resend</a>).
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          <b style="color: var(--ink)">Support.</b> If you email
+          <a href="mailto:support@hostbeam.app" style="color: var(--beam)">support@hostbeam.app</a>,
+          we keep the correspondence for as long as it's useful to help you.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          <b style="color: var(--ink)">This website.</b> Served by Cloudflare, which keeps standard
+          server logs. We use
+          <a href="https://www.cloudflare.com/web-analytics/" style="color: var(--beam)">Cloudflare Web Analytics</a>:
+          cookieless, no fingerprinting, no cross-site tracking. We see aggregate page views,
+          never people. The site sets no cookies of its own. The home page shows a
+          <a href="https://www.tinyshelf.co" style="color: var(--beam)">TinyShelf</a> badge, an
+          image your browser loads from tinyshelf.co on each visit, so TinyShelf sees that request
+          (your IP address and browser) as any image host would; it sets no cookie. Nothing on
+          the site loads a payment provider's script: there is nothing to buy.
+        </p>
+      </section>
+
+      <section style="margin-top: 40px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">Your data, your call</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          We keep license records for as long as your license is meant to work, which is forever,
+          so they persist unless you ask otherwise. Email
+          <a href="mailto:support@hostbeam.app" style="color: var(--beam)">support@hostbeam.app</a>
+          to access, correct, or delete what we hold about you (your email address and license
+          record), and we'll do it. Deleting a license record deactivates the license.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          Hostbeam is not directed at children, and since it has no accounts and no data
+          collection, we hold no personal data about anyone, children included.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          If this policy ever changes, the date at the top changes with it, and material changes
+          will be called out plainly, not buried.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          Hostbeam is an independent, developer-run product, made and operated by
+          <strong>PunkABeat</strong>, a sole proprietorship. For anything about this policy or
+          your data: <a href="mailto:support@hostbeam.app" style="color: var(--beam)">support@hostbeam.app</a>.
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>

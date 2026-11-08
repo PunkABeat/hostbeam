@@ -1,0 +1,129 @@
+/* ============================================================
+   Hostbeam — Color tokens
+   macOS-native: opacity-based label colors over materials,
+   one calm "beam" blue accent, system semantic colors.
+   Light is the default :root; dark overrides under .theme-dark.
+   ============================================================ */
+
+:root {
+  /* --- Brand: Beam blue -------------------------------------
+     Close to macOS system blue but a touch more saturated and
+     confident — the color of the one primary action (the beam). */
+  --beam-50:  #EAF1FE;
+  --beam-100: #D3E1FD;
+  --beam-200: #A9C4FB;
+  --beam-300: #7AA2F8;
+  --beam-400: #5183F7;
+  --beam-500: #2D6CF6;  /* primary accent */
+  --beam-600: #1B5AE0;  /* hover */
+  --beam-700: #1648B4;  /* pressed */
+
+  /* --- Raw neutral ink (light) ------------------------------ */
+  --ink: 0, 0, 0; /* @kind color */
+  --paper: 255, 255, 255; /* @kind color */
+
+  /* --- Label colors (text) — macOS semantic opacities ------- */
+  --label:            rgba(var(--ink), 0.85);
+  --label-secondary:  rgba(var(--ink), 0.50);
+  --label-tertiary:   rgba(var(--ink), 0.26);
+  --label-quaternary: rgba(var(--ink), 0.14);
+  --label-on-accent:  #FFFFFF;
+
+  /* --- Surfaces / materials --------------------------------- */
+  --window:            #ECECEC;  /* opaque approximation of window material */
+  --surface-popover:   #F6F6F7;  /* the menu-bar popover material */
+  --surface-content:   #FFFFFF;  /* content rows, fields */
+  --surface-raised:    #FFFFFF;  /* cards, menus */
+  --surface-sunken:    #F0F0F2;  /* wells, recessed areas */
+  --surface-overlay:   rgba(246, 246, 247, 0.72); /* use with backdrop-blur */
+
+  /* --- Control fills (translucent over any surface) --------- */
+  --fill:            rgba(var(--ink), 0.05);
+  --fill-secondary:  rgba(var(--ink), 0.08);
+  --fill-tertiary:   rgba(var(--ink), 0.12);
+  --fill-hover:      rgba(var(--ink), 0.06);
+  --fill-active:     rgba(var(--ink), 0.10);
+
+  /* --- Separators / borders --------------------------------- */
+  --separator:        rgba(var(--ink), 0.10);
+  --separator-strong: rgba(var(--ink), 0.16);
+  --border-field:     rgba(var(--ink), 0.16);
+  --hairline:         rgba(var(--ink), 0.06);
+
+  /* --- Accent (maps to brand) ------------------------------- */
+  --accent:        var(--beam-500);
+  --accent-hover:  var(--beam-600);
+  --accent-active: var(--beam-700);
+  --accent-tint:   var(--beam-50);   /* subtle selected-row background */
+  --focus-ring:    rgba(45, 108, 246, 0.40);
+
+  /* --- Semantic system colors ------------------------------- */
+  --success:        #28A745;
+  --success-tint:   #E6F4EA;
+  --warning:        #E08600;  /* pending / host warming up */
+  --warning-tint:   #FCEFD9;
+  --danger:         #E5484D;  /* host failure, errors */
+  --danger-tint:    #FBE9EA;
+  --info:           var(--beam-500);
+
+  /* --- Status dots (recent beams, host health) ------------ */
+  --dot-online:   var(--success);
+  --dot-pending:  var(--warning);
+  --dot-offline:  var(--label-tertiary);
+  --dot-error:    var(--danger);
+
+  /* --- Selection ------------------------------------------- */
+  --selection-bg: var(--beam-500);
+  --selection-fg: #FFFFFF;
+}
+
+/* ============================================================
+   Dark — vibrancy-dark popover, the common menu-bar look.
+   Single-selector theme scope; opacities flip to white ink.
+   ============================================================ */
+.theme-dark {
+  --ink: 255, 255, 255; /* @kind color */
+  --paper: 0, 0, 0; /* @kind color */
+
+  --label:            rgba(var(--ink), 0.92);
+  --label-secondary:  rgba(var(--ink), 0.55);
+  --label-tertiary:   rgba(var(--ink), 0.32);
+  --label-quaternary: rgba(var(--ink), 0.18);
+  --label-on-accent:  #FFFFFF;
+
+  --window:            #1C1C1E;
+  --surface-popover:   #262628;
+  --surface-content:   #2C2C2E;
+  --surface-raised:    #323234;
+  --surface-sunken:    #202022;
+  --surface-overlay:   rgba(38, 38, 40, 0.74);
+
+  --fill:            rgba(var(--ink), 0.08);
+  --fill-secondary:  rgba(var(--ink), 0.12);
+  --fill-tertiary:   rgba(var(--ink), 0.16);
+  --fill-hover:      rgba(var(--ink), 0.10);
+  --fill-active:     rgba(var(--ink), 0.16);
+
+  --separator:        rgba(var(--ink), 0.12);
+  --separator-strong: rgba(var(--ink), 0.20);
+  --border-field:     rgba(var(--ink), 0.18);
+  --hairline:         rgba(var(--ink), 0.08);
+
+  --beam-500: #4C8DFF;
+  --beam-600: #6EA1FF;
+  --beam-700: #8FB6FF;
+  --accent:        var(--beam-500);
+  --accent-hover:  var(--beam-600);
+  --accent-active: var(--beam-700);
+  --accent-tint:   rgba(76, 141, 255, 0.16);
+  --focus-ring:    rgba(76, 141, 255, 0.50);
+
+  --success:      #32D74B;
+  --success-tint: rgba(50, 215, 75, 0.16);
+  --warning:      #FF9F0A;
+  --warning-tint: rgba(255, 159, 10, 0.16);
+  --danger:       #FF6961;
+  --danger-tint:  rgba(255, 105, 97, 0.16);
+
+  --selection-bg: var(--beam-500);
+}

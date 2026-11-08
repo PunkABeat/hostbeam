@@ -1,0 +1,24 @@
+{
+  "name": "@hostbeam/video",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Hostbeam's launch film, written with Remotion. Outside the npm workspaces on purpose (like apps/raycast): its own lockfile, nothing added to the apps' dependency trees or their open-source notices.",
+  "scripts": {
+    "studio": "remotion studio",
+    "sounds": "python3 scripts/make-sounds.py",
+    "render": "remotion render HostbeamLaunch out/raw-launch.mp4 && ffmpeg -v error -y -i out/raw-launch.mp4 -c:v copy -af loudnorm=I=-15:TP=-1.5:LRA=11 -c:a aac -b:a 192k out/hostbeam-launch-16x9.mp4",
+    "render:x": "remotion render HostbeamX out/raw-x.mp4 && ffmpeg -v error -y -i out/raw-x.mp4 -c:v copy -af loudnorm=I=-15:TP=-1.5:LRA=11 -c:a aac -b:a 192k out/hostbeam-x-16x9.mp4",
+    "still": "remotion still HostbeamLaunch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "typescript": "^5.6.3"
+  }
+}

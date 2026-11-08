@@ -1,0 +1,88 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.tsx";
+import Footer from "../components/Footer.astro";
+---
+
+<Base
+  title="Terms · Hostbeam"
+  description="The terms for using and buying Hostbeam, in plain language: what the license grants, how refunds work, and the honest limits of a small software product."
+>
+  <div class="site" id="top">
+    <Nav />
+    <main class="wrap" style="max-width: 720px; padding-top: 64px; padding-bottom: 96px">
+      <p class="note">Terms of use · last updated 27 September 2026</p>
+      <h1 class="h2" style="font-size: clamp(32px, 4.5vw, 48px)">
+        Plain terms for a simple product.
+      </h1>
+      <p class="lede" style="margin-top: 20px">
+        Hostbeam is software you run on your own devices, talking to your own servers. These
+        terms cover the few things worth writing down. Using or buying Hostbeam means you agree
+        with them.
+      </p>
+      <p style="margin: 18px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+        Hostbeam is made and operated by <strong>PunkABeat</strong>, a sole proprietorship, and
+        that is the name you will see as the seller on your receipt.
+      </p>
+
+      <section style="margin-top: 48px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">Free use</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          Hostbeam is free to use for as long as you like, for any purpose, with every feature
+          and no account required. On the Mac it asks now and then whether you'd like to buy a
+          license; if you keep using it, please do. The iPhone app is free and sells nothing.
+        </p>
+      </section>
+
+      <section style="margin-top: 40px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">The license</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          A Hostbeam license is a one-time purchase for one person. It hides the reminder on up
+          to 3 of your Macs and covers every Hostbeam 1 release, with no time limit. A later major
+          version (Hostbeam 2) may be a paid, discounted upgrade; until you upgrade, that version
+          shows the reminder, and the versions your license covers keep working with every
+          feature. Deactivate a Mac in the app to free its seat for another.
+          Please don't share or resell keys; that's the one thing that breaks the honest model
+          this pricing depends on.
+        </p>
+      </section>
+
+      <section id="refunds" style="margin-top: 40px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">Purchases and refunds</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          Nothing is sold on this site any more: Hostbeam is free, with every feature and no
+          reminder. Licenses were sold until November 2026 by
+          <a href="https://paddle.com" style="color: var(--beam)">Paddle</a>, the merchant of
+          record, under
+          <a href="https://www.paddle.com/legal/checkout-buyer-terms" style="color: var(--beam)">Paddle's buyer terms</a>;
+          a key bought then keeps working. What applies to such a purchase is on the
+          <a href="/refunds/" style="color: var(--beam)">refund and cancellation policy</a> page.
+        </p>
+      </section>
+
+      <section style="margin-top: 40px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">The honest limits</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          Hostbeam is provided as is. It moves files between machines you control, using access
+          you configured; you're responsible for where you point it and what you beam. We work
+          hard to make it reliable, but we can't promise it is free of bugs, and to the maximum
+          extent the law allows, our liability for any damages is limited to what you paid for
+          your license. Nothing here limits rights that consumer law gives you and doesn't let
+          us take away.
+        </p>
+      </section>
+
+      <section style="margin-top: 40px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">Housekeeping</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          Hostbeam is an independent, developer-run product. How we handle data is in the
+          <a href="/privacy/" style="color: var(--beam)">privacy policy</a>. If these terms change,
+          the date at the top changes with them, and material changes will be called out plainly.
+          Questions:
+          <a href="mailto:support@hostbeam.app" style="color: var(--beam)">support@hostbeam.app</a>.
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>

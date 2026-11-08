@@ -1,0 +1,102 @@
+Site: Perplexity (https://www.perplexity.ai, logged out, default "Search" mode; Model menu shows only "Sonar")
+Question A: How do I paste a screenshot into Claude Code when it's running on a remote server over SSH?
+Timestamp: 2026-10-03T02:46:33Z
+Web sources cited: YES — "14 sources"
+
+Sources panel (14):
+- https://marketplace.visualstudio.com/items?itemName=lamkashingpaul.clip-to-claude
+- https://marketplace.visualstudio.com/items?itemName=TheHumanRace.claude-paste-image
+- https://marketplace.visualstudio.com/items?itemName=asfeng.claude-code-image-paste
+- https://github.com/hqhq1025/clipaste
+- https://github.com/mdrzn/claude-screenshot-uploader
+- https://mattgoodrich.com/posts/pasting-screenshots-into-a-remote-claude-session/
+- https://yafl.dev/guides/claude-code-screenshot-remote-server/
+- https://neymik.github.io/claude-code-remote-clipboard/
+- https://support.claude.com/en/articles/14554922-claude-code-user-faq
+- https://alexanderzeitler.com/articles/paste-clipboard-images-into-claude-code-over-ssh/
+- https://www.youtube.com/watch?v=PRE8oStED4U
+- https://www.youtube.com/watch?v=VGAiPpqQk0w
+- https://www.youtube.com/watch?v=VCGPy_tBcGA
+- https://www.youtube.com/watch?v=RoR9pMOZWkk
+Videos shown above the answer: "How to paste an image into Claude Code (in 40 seconds)", "How To Paste A Screenshot Into Claude Code! Tutorial", "How to Send an Image to Claude Code CLI Directly"
+
+--- Answer (verbatim innerText; short domain names on their own line are citation chips) ---
+
+You can't directly paste a screenshot from your local clipboard into a Claude Code session running on a remote server over SSH—SSH only transmits text and keystrokes, not binary image data. However, there are several practical workarounds depending on your setup:
+yafl
++1
+
+Quick options
+1. Use a VS Code extension (easiest if you use VS Code Remote-SSH)
+
+If you're running Claude Code inside VS Code's integrated terminal over Remote-SSH, install one of these extensions on your local machine:
+
+Clip To Claude – Press Cmd+Alt+V (Mac) or Ctrl+Alt+Shift+V (Windows) to paste a local clipboard image into the remote terminal; it inserts an [Image ...] token that Claude Code recognizes.
+marketplace.visualstudio
+
+Claude Paste – Copies the image to the remote host and injects the file path automatically when you press Cmd+V twice.
+marketplace.visualstudio
+
+Image Paste for Remote SSH (macOS) – Press Alt+I to save the clipboard image to /tmp/screenshots/ on the remote and paste the path.
+marketplace.visualstudio
+
+These handle the SSH tunneling and file transfer for you.
+
+2. Use clipaste (command-line, cross-platform)
+
+clipaste
+ is a small daemon that bridges your local clipboard to a remote Linux server over SSH:
+github
+
+bash
+# One-time setup from your local machine
+clipaste ssh-setup user@your-server
+
+# Then, in a new SSH session:
+ssh user@your-server
+claude
+# Now Ctrl+V in Claude Code will fetch the image from your local clipboard
+
+Important: use Ctrl+V (not Cmd+V on Mac) inside the remote session—Cmd+V is handled by your local terminal and only pastes text.
+github
++1
+
+3. Manual upload + paste the path
+
+If you prefer no extra tools:
+
+Take a screenshot and save it locally.
+
+Upload it to the server (e.g., scp, rsync, or drag-and-drop in VS Code Remote).
+
+In the Claude Code session, type or paste the remote file path (e.g., /tmp/screenshot.png). Claude Code can read images directly from disk when given a path.
+github
++1
+
+For macOS users who want this automated,
+claude-screenshot-uploader
+ is a menu bar app that uploads the screenshot over SSH and copies the remote path to your clipboard in one step.
+github
+
+Why Ctrl+V (not Cmd+V)?
+
+On macOS, Cmd+V is intercepted by your local terminal emulator and pastes text only. Ctrl+V, however, sends a raw ^V control character through SSH, which Claude Code on the remote interprets as "paste image from clipboard" (when a clipboard-bridging tool like clipaste is active).
+support.claude
++2
+
+Recommendation
+
+VS Code user? → Install Clip To Claude or Claude Paste for seamless pasting.
+marketplace.visualstudio
++1
+
+Terminal-only workflow? → Set up clipaste once, then use Ctrl+V in remote sessions.
+github
+
+Minimal dependencies? → Manually upload and paste the file path.
+mattgoodrich
+
+Let me know your OS and terminal setup if you'd like step-by-step instructions for a specific method.
+
+14 sources
+Suggested follow-ups: Show me how to set up clipaste / How do I use the VS Code Remote SSH extension / How do I upload images with scp and reference them / Does Claude Code accept local file paths for images / What other SSH clipboard tools exist

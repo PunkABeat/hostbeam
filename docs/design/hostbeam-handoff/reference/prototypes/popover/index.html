@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hostbeam — Menu-bar popover</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: var(--font-system); min-height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+  .d { position: relative; width: 100%; height: 100vh; }
+  .mb { position: absolute; top: 0; left: 0; right: 0; height: 28px; z-index: 30; display: flex; align-items: center; gap: 18px; padding: 0 14px;
+    color: #fff; background: rgba(20,22,28,0.42); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: inset 0 -0.5px 0 rgba(255,255,255,0.08); }
+  .mb-app { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 22px; border-radius: 5px; background: rgba(255,255,255,0.22); }
+  .anchor { position: absolute; top: 35px; right: 66px; z-index: 20; }
+  .pv-gear:hover { background: var(--fill-hover); color: var(--label) !important; }
+  .pv-recent { transition: background var(--dur-instant) var(--ease-standard); }
+  .pv-recent:hover { background: var(--fill-hover); }
+  .pv-morelink:hover { color: var(--label-secondary); text-decoration: underline; }
+  /* footer host switcher sits at the popover bottom — open its menu upward */
+  .pv-upward .hb-hostsel__menu { top: auto; bottom: calc(100% + 4px); }
+  /* immediate Geist-wrap fix for the host menu (also fixed in the DS component) */
+  .hb-hostsel__oname, .hb-hostsel__name { white-space: nowrap; }
+  .hb-hostsel__ometa { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 8px; }
+  button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  :focus:not(:focus-visible) { outline: none; }
+  /* beam-mark upload animation (BeamMark in popover.jsx) */
+  .bm .bm-ring { opacity: 0; transform-box: fill-box; transform-origin: center; }
+  .bm .bm-node { transform-box: fill-box; transform-origin: center; }
+  .bm-bar { height: 100%; background: var(--accent); border-radius: 3px; width: 100%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .bm-uploading .bm-el { animation: bmPulse 1.25s ease-in-out infinite; }
+    .bm-uploading .bm-ring { animation: bmRing 1.25s ease-out infinite; animation-delay: .36s; }
+    .bm-landing .bm-ring { animation: bmRing .72s ease-out 1 forwards; }
+    .bm-landing .bm-node { animation: bmPop .6s ease-out 1; }
+    .bm-bar { width: 45%; animation: bmBar 1.1s ease-in-out infinite; }
+    .bm-bar.done { width: 100%; animation: none; transform: none; transition: width .3s ease; }
+  }
+  @keyframes bmPulse { 0%,100% { opacity: .38; } 14% { opacity: 1; } 42% { opacity: .38; } }
+  @keyframes bmRing { 0% { opacity: .5; transform: scale(.55); } 46% { opacity: 0; transform: scale(2); } 100% { opacity: 0; transform: scale(2); } }
+  @keyframes bmPop { 0% { transform: scale(1); } 40% { transform: scale(1.24); } 100% { transform: scale(1); } }
+  @keyframes bmBar { 0% { transform: translateX(-120%); } 100% { transform: translateX(260%); } }
+  /* menu-bar blip — one-shot beam acknowledgment on beam-landed */
+  @keyframes mbBlip {
+    0%   { transform: scale(1);    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+    32%  { transform: scale(1.18); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent); }
+    100% { transform: scale(1);    box-shadow: 0 0 0 9px color-mix(in srgb, var(--accent) 0%, transparent); }
+  }
+  @media (prefers-reduced-motion: no-preference) { .mb-app.blip { animation: mbBlip .62s ease-out; } }
+  /* macOS-style notification banner on beam success (Notify on success) */
+  @keyframes toastIn { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: no-preference) { .hb-toast { animation: toastIn .34s cubic-bezier(0.22,1,0.36,1); } }
+  .toolbar { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 25; display: flex; align-items: center; gap: 10px;
+    background: var(--surface-overlay); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border-radius: var(--radius-full); box-shadow: var(--shadow-menu); padding: 6px 8px 6px 14px; color: var(--label); }
+  .toolbar .lab { font-size: 11.5px; color: var(--label-secondary); white-space: nowrap; }
+  .toolbar a { font-size: 11.5px; color: var(--label-secondary); text-decoration: none; padding: 6px 10px; border-radius: var(--radius-md); white-space: nowrap; }
+  .toolbar a:hover { background: var(--fill-hover); color: var(--label); }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="../onboarding/shared.jsx" type="text/babel"></script>
+  <script src="popover.jsx" type="text/babel"></script>
+  <script src="../onboarding/tweaks-panel.jsx" type="text/babel"></script>
+  <script type="text/babel" data-presets="react">
+    (function () {
+      const { useTweaks, TweaksPanel, TweakSection, TweakRadio, TweakSelect, TweakColor } = window;
+
+      const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+        "accent": "#2D6CF6",
+        "dark": false,
+        "wallpaper": "#41506b",
+        "beamResult": "auto"
+      }/*EDITMODE-END*/;
+
+      function accentVars(c) {
+        return {
+          "--accent": c,
+          "--accent-hover": `color-mix(in srgb, ${c} 86%, #000)`,
+          "--accent-active": `color-mix(in srgb, ${c} 74%, #000)`,
+          "--accent-tint": `color-mix(in srgb, ${c} 13%, transparent)`,
+          "--beam-500": c,
+          "--focus-ring": `color-mix(in srgb, ${c} 40%, transparent)`,
+        };
+      }
+
+      function Toast() {
+        const [n, setN] = React.useState(null); // { hostName, path, id }
+        React.useEffect(() => {
+          const on = (e) => {
+            const d = e.detail || {}; const id = Date.now();
+            setN({ hostName: d.hostName, path: d.path, id });
+            setTimeout(() => setN((c) => (c && c.id === id ? null : c)), 4600);
+          };
+          window.addEventListener("hb:notify", on);
+          return () => window.removeEventListener("hb:notify", on);
+        }, []);
+        if (!n) return null;
+        const base = (n.path || "").split("/"); const file = base[base.length - 1] || n.path;
+        return (
+          <div className="hb-toast" key={n.id} onClick={() => setN(null)}
+            style={{ position: "fixed", top: 38, right: 14, zIndex: 60, width: 360, display: "flex", gap: 11, padding: "12px 13px", cursor: "default",
+              background: "var(--surface-overlay)", backdropFilter: "blur(24px) saturate(160%)", WebkitBackdropFilter: "blur(24px) saturate(160%)",
+              borderRadius: 17, boxShadow: "var(--shadow-menu)", boxSizing: "border-box" }}>
+            <img src="../../assets/hostbeam-icon.svg" width="38" height="38" style={{ borderRadius: 9, flex: "none" }} alt="" />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--label)" }}>Hostbeam</span>
+                <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--label-tertiary)" }}>now</span>
+              </div>
+              <div style={{ fontSize: 12.5, color: "var(--label)", marginTop: 1 }}>Beamed to {n.hostName}</div>
+              <div style={{ fontSize: 11.5, color: "var(--label-secondary)", marginTop: 2, fontFamily: "var(--font-mono)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{file} · path copied</div>
+            </div>
+          </div>
+        );
+      }
+
+      function App() {
+        const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+        // Menu-bar "blip": a one-shot beam acknowledgment on the always-visible glyph
+        // when a beam lands in the popover (dispatched as the hb:beamed event).
+        const mbRef = React.useRef(null);
+        React.useEffect(() => {
+          const on = () => { const el = mbRef.current; if (!el) return; el.classList.remove("blip"); void el.offsetWidth; el.classList.add("blip"); setTimeout(() => { if (el) el.classList.remove("blip"); }, 700); };
+          window.addEventListener("hb:beamed", on);
+          return () => window.removeEventListener("hb:beamed", on);
+        }, []);
+        const wp = t.wallpaper;
+        const bg = `radial-gradient(120% 90% at 78% 8%, color-mix(in srgb, ${wp} 76%, #fff) 0%, ${wp} 46%, color-mix(in srgb, ${wp} 72%, #000) 100%)`;
+        return (
+          <div className={"d" + (t.dark ? " theme-dark" : "")} style={{ ...accentVars(t.accent), background: bg }}>
+            <div className="mb">
+              <span style={{ fontSize: 13, fontWeight: 600, opacity: .9 }}>Terminal</span>
+              <span style={{ fontSize: 13, opacity: .7 }}>Shell</span>
+              <span style={{ fontSize: 13, opacity: .7 }}>View</span>
+              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 14 }}>
+                <span className="mb-app" ref={mbRef}><img src="../../assets/hostbeam-menubar.svg" width="17" height="17" alt="" /></span>
+                <span style={{ fontSize: 12.5, opacity: .85, fontVariantNumeric: "tabular-nums", display: "inline-block", width: 64, textAlign: "right" }}>Sun 15:30</span>
+              </div>
+            </div>
+            <div className="anchor">
+              <window.Popover simResult={t.beamResult} />
+            </div>
+            <Toast />
+            <div className="toolbar">
+              <span className="lab">Menu-bar popover · steady state</span>
+              <a href="../preferences/index.html">Preferences →</a>
+            </div>
+
+            <TweaksPanel>
+              <TweakSection label="Beam outcome" />
+              <TweakSelect label="Result" value={t.beamResult} options={["auto", "success", "timeout", "auth", "permission"]} onChange={(v) => setTweak("beamResult", v)} />
+              <TweakSection label="Appearance" />
+              <TweakColor label="Accent" value={t.accent} options={["#2D6CF6", "#0E84C2", "#1F8A5B", "#7A5AE0"]} onChange={(v) => setTweak("accent", v)} />
+              <TweakRadio label="Theme" value={t.dark ? "dark" : "light"} options={["light", "dark"]} onChange={(v) => setTweak("dark", v === "dark")} />
+              <TweakColor label="Wallpaper" value={t.wallpaper} options={["#41506b", "#4a4a52", "#5a4a44", "#36473f"]} onChange={(v) => setTweak("wallpaper", v)} />
+            </TweaksPanel>
+          </div>
+        );
+      }
+      ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+    })();
+  </script>
+</body>
+</html>

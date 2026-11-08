@@ -1,0 +1,38 @@
+/* ============================================================
+   Hostbeam — Spacing tokens
+   4pt grid. Utility surfaces are dense; most gaps are 6–12px.
+   ============================================================ */
+
+:root {
+  --space-0: 0px;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-7: 16px;
+  --space-8: 20px;
+  --space-9: 24px;
+  --space-10: 32px;
+  --space-11: 40px;
+  --space-12: 48px;
+
+  /* --- Semantic spacing ----------------------------------- */
+  --gap-inline: var(--space-3); /* between icon + label */
+  --gap-control: var(--space-2); /* inside small controls */
+  --gap-stack: var(--space-4); /* between stacked controls */
+  --gap-section: var(--space-7); /* between popover sections */
+  --row-pad-x: var(--space-6); /* list-row horizontal pad */
+  --row-pad-y: var(--space-5); /* list-row vertical pad */
+  --popover-pad: var(--space-6); /* popover inner padding */
+
+  /* --- Fixed surface metrics ------------------------------ */
+  --popover-width: 340px; /* menu-bar popover width */
+  --row-height: 36px; /* standard list row */
+  --row-height-lg: 52px; /* recent-beam row w/ thumbnail */
+  --control-height: 28px; /* default control / button */
+  --control-height-lg: 36px; /* primary beam button */
+  --control-height-sm: 22px; /* compact / inline button */
+  --hit-target: 28px; /* min interactive size (utility scale) */
+}

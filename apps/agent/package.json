@@ -1,0 +1,10 @@
+{
+  "name": "@hostbeam/agent",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Agent-side tools: an MCP server and a prompt hook that let a coding agent see beamed screenshots without the user pasting a path.",
+  "scripts": {
+    "test": "node --test hostbeam-agent.test.mjs"
+  }
+}

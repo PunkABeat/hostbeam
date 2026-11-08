@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "hud",
+  "description": "The floating beam HUD: it renders what Rust sends and asks for a clipboard preview, nothing more",
+  "windows": ["hud"],
+  "permissions": ["core:default"]
+}

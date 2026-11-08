@@ -1,0 +1,31 @@
+Claude Code 2.1.288 (Claude Code) · 2026-10-03T02:46:13Z · question C
+Q: How do I send a screenshot from my iPhone to Claude Code running on my server?
+---
+Over SSH, Claude Code can't see your phone's clipboard, so pasting an image into the terminal won't work. The reliable method is to copy the image file onto the server and give Claude its path. Claude Code can read image files directly.
+
+## 1. Get the file onto the server
+
+Pick whichever fits your setup:
+
+- **SSH/SFTP app on the iPhone** (Termius, Blink Shell, ShellFish, Secure ShellFish): these can upload files over SFTP. Share the screenshot from Photos to the app, or use its SFTP browser, and save it somewhere like `~/screenshots/`.
+- **iOS Files app + ShellFish**: ShellFish adds your server as a location in the Files app. Save the screenshot there from the share sheet.
+- **Tailscale**: if both devices are on your tailnet, use Taildrop. Share the screenshot to Tailscale, pick the server, and receive it with `tailscale file get ~/screenshots/` on the server.
+- **Through your Mac**: AirDrop it to the Mac, then run `scp ~/Downloads/IMG_1234.PNG user@server:~/screenshots/`.
+- **Cloud sync**: if the server syncs a folder (Dropbox, Syncthing, rclone mount), save the screenshot into that folder from the share sheet.
+
+## 2. Point Claude Code at it
+
+In your Claude Code session on the server, refer to the file by its path:
+
+```
+Look at ~/screenshots/IMG_1234.PNG and tell me why the layout is broken
+```
+
+You can also type `@` and the path to attach the file. Claude reads the image itself, and PNG and JPEG both work.
+
+## Tips
+
+- **Shorter filenames:** set up an iOS Shortcut that runs "Get latest screenshot" → upload over SFTP (Termius and ShellFish both have Shortcut actions) → save as `latest.png`. Then you can just say "look at ~/screenshots/latest.png".
+- **Remote Control:** if you're running Claude Code with Remote Control and driving the session from the Claude iOS app, check whether the app lets you attach images there. That would skip the file transfer, but I'm not certain image attachments get passed through to a server session, so test it before relying on it.
+
+What are you using to connect from your phone (Termius, Blink, Remote Control, something else)? I can give you exact steps for that.

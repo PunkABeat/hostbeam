@@ -1,0 +1,45 @@
+{
+  // Static-asset deploy for the marketing site (ADR 0013).
+  //
+  //   npm run deploy:web        # from the repo root: build, then deploy
+  //
+  // The site is static; `main` exists to redirect www to the apex and http to
+  // https (worker/index.js). Paddle
+  // cannot approve a `www.` checkout domain, so the apex is the only hostname
+  // that may launch a checkout — see worker/index.js. The licensing glue is a
+  // separate Worker (apps/license-webhook), and the only other dynamic thing the
+  // site does — polling for a license key on /thanks — is a browser fetch to
+  // that Worker, not server code here.
+  //
+  // NOTE: checkout configuration is read at BUILD time from PUBLIC_PADDLE_*
+  // (see .env.example and README.md, "Two environments"), so what gets deployed
+  // depends on which env file is present when `astro build` runs. With none,
+  // checkout.ts falls back to sandbox with an empty token and /buy shows the
+  // pre-launch notice — which is what we want to ship before go-live. To go
+  // live, put the production block in apps/web/.env.production (gitignored)
+  // and redeploy.
+  "name": "hostbeam-web",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-08-29",
+
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // The redirect has to happen before an asset is served, or www would return
+    // the page itself and never redirect.
+    "run_worker_first": true,
+    // Serve src/pages/404.astro (built to dist/404.html) for unmatched paths.
+    // Without this an unmatched path gets a bare Cloudflare 404 with no way
+    // back into the site.
+    "not_found_handling": "404-page"
+  },
+
+  // `custom_domain: true` makes wrangler create and manage the DNS records, so
+  // the apex does not need a hand-added A record. www is routed here only so it
+  // can be 301'd to the apex rather than failing to resolve; it never serves the
+  // site itself.
+  "routes": [
+    { "pattern": "hostbeam.app", "custom_domain": true },
+    { "pattern": "www.hostbeam.app", "custom_domain": true }
+  ]
+}

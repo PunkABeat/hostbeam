@@ -1,0 +1,96 @@
+[package]
+name = "hostbeam"
+version = "0.1.35"
+description = "Beam a screenshot straight to your server."
+authors = ["Hostbeam"]
+edition = "2021"
+# Pinned with rust-toolchain.toml so CI and every Mac build alike; bump both.
+rust-version = "1.93"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "hostbeam_lib"
+# No "staticlib": the template adds it for Tauri's own iOS target, but the
+# iPhone app is native Swift, and it wrote a ~500 MB archive on every debug build.
+crate-type = ["cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# The facade Tauri and its plugins log through; log.rs installs a logger for it
+# so the updater's lines land in the support log. Already in the tree via tauri.
+log = "0.4"
+tauri = { version = "2", features = ["protocol-asset", "tray-icon", "image-png", "macos-private-api"] }
+tauri-plugin-global-shortcut = "2"
+# Launch at login (Preferences → General → Startup) through SMAppService, the
+# macOS 13+ API that lists the app under Login Items → "Open at Login"; objc
+# is the message-send bridge to it (startup.rs). Already in the tree via
+# tauri-nspanel, so no new code is pulled in.
+objc = "0.2"
+# In-app updates (milestone 007): checks download.hostbeam.app/latest.json;
+# releases are signed with the Hostbeam updater key (public key in tauri.conf.json).
+tauri-plugin-updater = "2"
+# access(2), so an update installed without asking can tell beforehand whether
+# the updater would need an administrator password (updates.rs). Already in the
+# tree via tauri, so no new code is pulled in.
+libc = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Typed, cause-preserving error enums for the core (engineering rust.md §Error handling).
+thiserror = "2"
+arboard = "3"
+# Decoders for every format with a pure-Rust one, which is exactly the set
+# `PULL_EXTENSIONS` already allows. Only Recent thumbnails and pull previews
+# read these — a dropped file is sent byte-for-byte, never re-encoded — so
+# this buys thumbnails, not fidelity. HEIC/HEIF and AVIF stay out: they would
+# mean libheif and dav1d, C libraries in the bundle for a 38x26 preview.
+image = { version = "0.25", default-features = false, features = [
+    "png",
+    "jpeg",
+    "gif",
+    "webp",
+    "bmp",
+    "tiff",
+] }
+base64 = "0.22"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+dirs = "5"
+# License validation/activation against the Keygen API (ADR 0014). Blocking is
+# fine — every call runs inside spawn_blocking like the ssh/scp work.
+ureq = { version = "2", features = ["json"] }
+# Pinned to a commit, not a branch: a `cargo update` must not move a dependency
+# that is unsafe AppKit code in the popover's path. 2.1.0 is on crates.io on the
+# objc2 stack; moving to it is the platform-layer work, not a version bump.
+tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", rev = "18ffb9a201fbf6fedfaa382fd4b92315ea30ab1a" }
+# GCD dispatch_after: schedule the HUD auto-hide on the main queue. Unlike Tauri's
+# event-loop proxy, dispatch_after wakes an idle main run loop, so the hide fires
+# even when the app is inactive (an accessory app with no key window). Already in
+# the tree transitively via cocoa/objc2.
+dispatch2 = "0.3"
+# Catching an Objective-C exception AppKit throws from the pasteboard, which
+# otherwise aborts the whole app (clipboard.rs). Already in the tree via tauri
+# with this feature on, so no new code is pulled in — only a direct edge.
+objc2 = { version = "0.6", features = ["exception"] }
+
+# Dependencies are optimised even in dev builds. Unoptimised, a Recent preview
+# of one 3 MB screenshot took 7.3 s, against 0.14 s in release (2026-09-25), so
+# `npm run tauri dev` showed beams far slower than anyone would ever see them.
+# With this, and the resize routed through the image crate's own compiled code
+# (`scaled` in services/image.rs), it is 0.37 s. Hostbeam's own crate stays at
+# opt-level 0, so rebuilding while editing is as quick as before; only the
+# first build of the dependencies takes longer, and it is cached.
+[profile.dev.package."*"]
+opt-level = 2
+
+[lints.rust]
+# tauri-nspanel's panel_delegate! macro expands to #[cfg(feature = "cargo-clippy")]
+# (an old clippy idiom). We don't define that feature, so declare it as a known
+# value to silence unexpected_cfgs without disabling the lint for real typos.
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(feature, values("cargo-clippy"))'] }
+
+

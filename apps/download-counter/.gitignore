@@ -1,0 +1,4 @@
+# The D1 migrations are source. A global gitignore that drops *.sql (the
+# owner's does) would leave them out of a commit without a word, and the next
+# deploy from a clean checkout would then have no table to count into.
+!migrations/*.sql

@@ -1,0 +1,47 @@
+Claude Code 2.1.288 (Claude Code) · 2026-10-03T02:45:51Z · question B
+Q: What's the best way to send a screenshot from my Mac to a coding agent running on a remote server?
+---
+The easiest setup is a small script that takes a screenshot, copies it to the server with `scp`, and puts the remote file path on your clipboard. You then paste that path into the agent's prompt, and the agent reads the image from disk.
+
+Pasting the image directly (Ctrl+V or drag-and-drop) usually doesn't work over SSH. The agent runs on the server, so it can't see your Mac's clipboard. Dragging a file into the terminal only types the *local* path, which doesn't exist on the server.
+
+## Recommended: screenshot → scp → copy path
+
+Save this as `~/bin/shot2remote`:
+
+```bash
+#!/bin/zsh
+set -e
+REMOTE="user@yourserver"          # or an alias from ~/.ssh/config
+REMOTE_DIR="/tmp/screenshots"
+
+name="shot-$(date +%Y%m%d-%H%M%S).png"
+local_file="/tmp/$name"
+
+screencapture -i "$local_file"     # drag to select; Space toggles window capture
+[[ -f "$local_file" ]] || exit 0   # stop if you pressed Esc
+
+ssh "$REMOTE" "mkdir -p $REMOTE_DIR"
+scp -q "$local_file" "$REMOTE:$REMOTE_DIR/$name"
+echo -n "$REMOTE_DIR/$name" | pbcopy
+rm "$local_file"
+echo "Copied: $REMOTE_DIR/$name"
+```
+
+Make it executable with `chmod +x ~/bin/shot2remote`. To use it:
+
+1. Run `shot2remote` and select the area to capture.
+2. In the agent session, type something like `look at <Cmd+V>`. Claude Code and most other agents will read an image file when you give them its path.
+
+**Tips:**
+- **Make it fast:** turn on SSH connection reuse in `~/.ssh/config` (`ControlMaster auto`, `ControlPath ~/.ssh/cm-%r@%h:%p`, `ControlPersist 10m`). The upload then takes well under a second.
+- **Add a hotkey:** bind the script to a keyboard shortcut with Raycast, Alfred, Hammerspoon, or a Shortcuts.app "Run Shell Script" action.
+- **Send an existing screenshot:** use `scp ~/Desktop/Screenshot*.png server:/tmp/`, or adapt the script to take a file argument.
+
+## Other options
+
+- **VS Code / Cursor Remote-SSH:** if you run the agent in the editor's integrated terminal, drag the image into the remote file explorer. It uploads automatically, and you can then reference its path.
+- **A synced folder:** use Mutagen, Syncthing, or `sshfs` to sync a local folder with one on the server, and point macOS screenshots at it (`defaults write com.apple.screencapture location ~/remote-shots`). Every screenshot then appears on the server automatically. This is good if you send screenshots often, but it's more to set up.
+- **Run the agent's UI locally:** some tools, like Claude Code's desktop and web apps, let you paste images directly while the work runs on a remote machine. This avoids the problem entirely, if your workflow allows it.
+
+For most people, the script plus a hotkey is the best fit: it takes one keystroke, then one paste.

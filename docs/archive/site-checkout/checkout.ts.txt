@@ -1,0 +1,37 @@
+// Checkout configuration (ADR 0014). Read from the build environment so one
+// codebase serves both the live site and a sandbox/staging deploy without a
+// code edit — see apps/web/.env.example.
+//
+// Client-side tokens and price ids are PUBLIC identifiers: they only let a page
+// open a checkout, which is why they carry Astro's PUBLIC_ prefix and are
+// inlined into the browser bundle. The Paddle *API key* is a real secret and
+// lives only in the worker's wrangler secrets — never here.
+
+/** Defaults to "sandbox" so a misconfigured build fails closed: it shows the
+ * pre-launch notice instead of silently opening a live checkout. */
+export const PADDLE_ENV: "sandbox" | "production" =
+  import.meta.env.PUBLIC_PADDLE_ENV === "production" ? "production" : "sandbox";
+
+/* Paddle → Developer tools → Authentication → Client-side tokens.
+   Sandbox tokens start with `test_`, live ones with `live_`. */
+export const PADDLE_CLIENT_TOKEN: string = import.meta.env.PUBLIC_PADDLE_CLIENT_TOKEN ?? "";
+
+/* The $29 one-time price (Catalog → Products → Hostbeam License → price id,
+   `pri_…`). Used by the Buy button to open a checkout directly. */
+export const PADDLE_PRICE_ID: string = import.meta.env.PUBLIC_PADDLE_PRICE_ID ?? "";
+
+/* The licensing glue worker (apps/license-webhook) on its custom domain — the
+   thank-you page polls `${LICENSE_API}/key?transaction_id=…` to show the key
+   right after checkout. */
+export const LICENSE_API: string =
+  import.meta.env.PUBLIC_LICENSE_API ?? "https://license.hostbeam.app";
+
+/* Hosts besides localhost where a *sandbox* checkout may open, e.g. a staging
+   deploy. The sandbox accepts universal test cards, so anywhere listed here can
+   mint a license for free — keep it empty in production builds. */
+export const SANDBOX_HOSTS: readonly string[] = (
+  import.meta.env.PUBLIC_PADDLE_SANDBOX_HOSTS ?? ""
+)
+  .split(",")
+  .map((h) => h.trim())
+  .filter(Boolean);

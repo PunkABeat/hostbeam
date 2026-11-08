@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Mirrors the App Privacy answers in docs/process/ios-submission-checklist.md:
+	     Data Not Collected since ADR 0028 (2026-09-27). The iPhone app is free,
+	     with no licence and no in-app purchase, so nothing reaches Hostbeam (it
+	     declared licence key, device fingerprint and App Store transaction id
+	     until then). The screenshot itself goes to the user's own host and is
+	     not collected. -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array>
+	</array>
+	<!-- Required-reason APIs: UserDefaults through the app group shared with
+	     the extensions (1C8F.1), and the app's own defaults (CA92.1). -->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>1C8F.1</string>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

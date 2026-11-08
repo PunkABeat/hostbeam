@@ -1,0 +1,231 @@
+---
+import Guide from "../../layouts/Guide.astro";
+import { APP_STORE_URL, IPHONE_APP_LIVE } from "../../lib/links";
+
+// Every fact about another tool comes from its own site, README, store page or
+// changelog, checked on 2026-10-03; the sources are in
+// docs/research/screenshot-tools-2026-10.md — recheck them before changing a claim.
+// A wrong claim about a competitor is worse than no page: when one of these
+// changes, fix the line and bump `updated` in lib/guides.ts.
+---
+
+<Guide slug="mac-tools-that-send-screenshots-to-a-remote-agent">
+  <p class="lede">
+    When your coding agent runs on a server, a screenshot on your Mac has to travel there before
+    the agent can see it. At least eleven tools do that job today. They differ in how you trigger
+    them, what they put on the server and what they cost. Hostbeam is ours; it is here like the
+    rest, checked the same way.
+  </p>
+
+  <section>
+    <h2>Three questions decide it</h2>
+    <ul>
+      <li>
+        <b>Only screenshots from your Mac, or files too, and from your iPhone?</b> Most of these
+        tools send images from a Mac; a few take any file; one sends from a phone.
+      </li>
+      <li>
+        <b>Do you also need to see what the agent builds?</b> When it starts a dev server on the
+        server, two of these open it on your Mac.
+      </li>
+      <li>
+        <b>One app, or any app?</b> Some work inside a single terminal or editor; others work with
+        whatever terminal and agent you use.
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>The four ways they work</h2>
+    <ul>
+      <li>
+        <b>Watch the clipboard.</b> Every image you copy is uploaded, and the clipboard is swapped
+        for its path on the server. Nothing to press. Paste2SSH, SSH Screenshot Bridge.
+      </li>
+      <li>
+        <b>You send it.</b> A shortcut, a command or a click. Nothing leaves until you ask.
+        Hostbeam, screencp, clipssh, SSH Image Drop, Image Paste for Remote SSH,
+        claude-screenshot-uploader.
+      </li>
+      <li>
+        <b>Catch the paste in your terminal.</b> You paste as usual and the tool uploads on the way.
+        FainLane, and cmux for files you drop.
+      </li>
+      <li>
+        <b>Tunnel the clipboard to the server.</b> Ctrl+V on the server reaches back to your Mac.
+        clipaste.
+      </li>
+    </ul>
+    <p>
+      Whichever it is, the agent ends up with a path. Claude Code, Codex, Gemini CLI and OpenCode
+      attach the image when you give them its path (<a
+        href="/guides/paste-a-screenshot-into-claude-code-over-ssh/">why</a
+      >).
+    </p>
+  </section>
+
+  <section>
+    <h2>At a glance</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Tool</th><th>iPhone</th><th>Opens the dev server</th><th>Any file</th><th>Installs on the server</th><th>Price</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Hostbeam</td><td>Yes</td><td>Yes, in any browser</td><td>Yes, to 100 MB</td><td>Nothing</td><td>Free; $29 licence optional</td></tr>
+          <tr><td>cmux</td><td>—</td><td>Yes, in its own browser panes</td><td>Yes</td><td>A helper</td><td>Free, GPL</td></tr>
+          <tr><td>Paste2SSH</td><td>—</td><td>—</td><td>Yes</td><td>Nothing</td><td>Free</td></tr>
+          <tr><td>SSH Image Drop</td><td>—</td><td>—</td><td>Yes, and folders</td><td>Nothing</td><td>Free, MIT</td></tr>
+          <tr><td>FainLane</td><td>—</td><td>—</td><td>Images</td><td>Nothing</td><td>$12 a year</td></tr>
+          <tr><td>clipaste</td><td>—</td><td>—</td><td>Images</td><td>A clipboard shim</td><td>Free, MIT</td></tr>
+          <tr><td>SSH Screenshot Bridge</td><td>—</td><td>—</td><td>Images</td><td>Nothing</td><td>Free</td></tr>
+          <tr><td>screencp</td><td>—</td><td>—</td><td>Images</td><td>Nothing</td><td>Free</td></tr>
+          <tr><td>claude-screenshot-uploader</td><td>—</td><td>—</td><td>PNG, JPEG</td><td>Nothing</td><td>Free, MIT</td></tr>
+          <tr><td>clipssh</td><td>—</td><td>—</td><td>PNG</td><td>Nothing</td><td>Free, MIT</td></tr>
+          <tr><td>Image Paste for Remote SSH</td><td>—</td><td>—</td><td>PNG</td><td>VS Code's server</td><td>Free, MIT</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="aside">
+      — means the tool's own pages don't offer it, as of the date above. The table leaves out how
+      each one sends: Paste2SSH and SSH Screenshot Bridge, for one, upload every image you copy with
+      nothing to press. The next section credits what each does best.
+    </p>
+  </section>
+
+  <section>
+    <h2>Each one, fairly</h2>
+
+    <h3><a rel="nofollow" href="https://paste2ssh.com/">Paste2SSH</a></h3>
+    <p>
+      Turn on Paste Mode and every image you copy is uploaded, with the clipboard swapped for the
+      remote path; you can also drop files on its window, several at once. It uses your keys and
+      <code class="mono">~/.ssh/config</code>, switches hosts in a click, keeps your last 100 paths
+      and holds the connection open so later uploads are quick. Free with an optional tip, macOS 14
+      and later, not open source. A Linux build is in alpha. Last release June 2026.
+    </p>
+
+    <h3><a rel="nofollow" href="https://github.com/stefanomainardi/ssh-screenshot-bridge">SSH Screenshot Bridge</a></h3>
+    <p>
+      Watches the clipboard and uploads with scp to hosts from your SSH config or your Tailscale
+      network, and deletes the previous upload so only one screenshot sits on the server. Images
+      only. macOS 15 and later, built from source.
+    </p>
+
+    <h3><a rel="nofollow" href="https://github.com/puma314/screencp">screencp</a></h3>
+    <p>
+      Click the menu-bar icon, pick a screenshot from a grid, pick a host, press Send. It copies the
+      path, <code class="mono">host:path</code> or the whole scp command, as you prefer. Images
+      only. macOS 14 and later, unsigned.
+    </p>
+
+    <h3><a rel="nofollow" href="https://github.com/mdrzn/claude-screenshot-uploader">claude-screenshot-uploader</a></h3>
+    <p>
+      An xbar plugin that watches your screenshots folder, or uploads on a click, with rsync over
+      SSH to servers you list in it, then copies the remote path. Keeps an activity log. PNG and
+      JPEG, MIT.
+    </p>
+
+    <h3><a rel="nofollow" href="https://github.com/samuellawrentz/clipssh">clipssh</a></h3>
+    <p>
+      A Bash script: copy a screenshot, run <code class="mono">clipssh myserver</code>, and the path
+      is on your clipboard. Follows your SSH config, works from a Mac or Linux desktop. PNG, MIT.
+    </p>
+
+    <h3><a rel="nofollow" href="https://raycast.com/wjsong/ssh-image-drop">SSH Image Drop</a></h3>
+    <p>
+      A Raycast extension: a command, or a hotkey per server, sends the clipboard image or the files
+      selected in Finder, several at once, and can pull files back. It signs in with a password kept
+      in the Keychain or a key it installs. MIT.
+    </p>
+
+    <h3><a rel="nofollow" href="https://marketplace.visualstudio.com/items?itemName=asfeng.claude-code-image-paste">Image Paste for Remote SSH</a></h3>
+    <p>
+      For Claude Code in a VS Code Remote-SSH terminal: Alt+I saves the clipboard image on the
+      server and types its path. Nothing else to set up if you already work in VS Code. PNG, MIT.
+    </p>
+
+    <h3><a rel="nofollow" href="https://fainlane.com/">FainLane</a></h3>
+    <p>
+      Paste with Ctrl+V as usual in Ghostty, iTerm2 or Terminal: FainLane uploads the image, types
+      the path at your cursor and finds the host from the session you're in, tmux and mosh
+      included. Images only. Needs Accessibility and Automation permissions. Apple silicon, macOS
+      15.7 and later; $12 a year after a 14-day trial.
+    </p>
+
+    <h3><a rel="nofollow" href="https://cmux.com/docs/ssh">cmux</a></h3>
+    <p>
+      A full terminal app for coding agents: drop an image or any file into a remote session and
+      it's uploaded over that session's connection. Its browser panes reach the server's network,
+      so <code class="mono">localhost:3000</code> in cmux is the remote dev server. It installs a
+      small helper on the server the first time you connect, and also does mosh. Free and open
+      source.
+    </p>
+
+    <h3><a rel="nofollow" href="https://github.com/hqhq1025/clipaste">clipaste</a></h3>
+    <p>
+      A daemon on your Mac serves the clipboard image through an SSH tunnel, and a one-time setup
+      puts a stand-in for <code class="mono">xclip</code> on the server, so Ctrl+V in Claude Code
+      on a Linux server just works; Codex runs a helper that prints a path. It needs the server to
+      allow SSH port forwarding, which hardened servers often turn off. Also runs on Windows and
+      Linux desktops. MIT.
+    </p>
+
+    <h3>Hostbeam</h3>
+    <p>
+      Copy a screenshot, or a file in Finder, and press <code class="mono">⌘⇧7</code>, or drop it on
+      the menu-bar icon: it's uploaded to the host you picked and its path is on your clipboard.
+      Any file up to 100 MB, several at once. It checks the host key before anything is sent, never
+      overwrites a file, and installs nothing on the server.
+    </p>
+    <ul>
+      {
+        IPHONE_APP_LIVE ? (
+          <li>
+            A free <a href={APP_STORE_URL}>iPhone app</a> sends from the share sheet, a widget or
+            Back Tap.
+          </li>
+        ) : (
+          <li>An iPhone app sends from the share sheet, once it's on the App Store.</li>
+        )
+      }
+      <li>
+        It also <a href="/guides/open-a-remote-dev-server-on-your-mac/">opens the dev server</a> your
+        agent started, in whichever browser you use, even where SSH port forwarding is off.
+      </li>
+      <li>
+        Its free <a href="/agents/">MCP server</a> lets the agent fetch your latest screenshot
+        itself.
+      </li>
+    </ul>
+    <p>
+      Free with no limit. After the first week it asks now and then for a $29 licence, and never
+      blocks anything. macOS 13 and later.
+    </p>
+  </section>
+
+  <section>
+    <h2>Which one</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>If you want</th><th>Look at</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>the phone too, the dev server back, any file, with any terminal and agent</td><td>Hostbeam</td></tr>
+          <tr><td>one app for the terminal and the browser</td><td>cmux</td></tr>
+          <tr><td>nothing to press at all, Mac screenshots only</td><td>Paste2SSH</td></tr>
+          <tr><td>Ctrl+V to just work in your terminal</td><td>FainLane, or clipaste if forwarding is allowed</td></tr>
+          <tr><td>to stay in Raycast or VS Code</td><td>SSH Image Drop, the VS Code extension</td></tr>
+          <tr><td>a script you can read</td><td>clipssh</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      None of the others says it sends from an iPhone; on a phone, Termius uploads an image you
+      paste into a session. If you make one of these tools and something here is wrong or out of
+      date, write to <a href="mailto:support@hostbeam.app">support@hostbeam.app</a> and it gets
+      fixed.
+    </p>
+  </section>
+</Guide>

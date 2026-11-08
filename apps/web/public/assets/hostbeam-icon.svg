@@ -1,0 +1,25 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hostbeam app icon">
+  <defs>
+    <linearGradient id="hb-bg" x1="512" y1="64" x2="512" y2="960" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5A95FF"></stop>
+      <stop offset="1" stop-color="#2A66EC"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="232" fill="url(#hb-bg)"></rect>
+  <rect width="1024" height="512" rx="232" fill="#FFFFFF" opacity="0.07"></rect>
+
+  
+  <rect x="478" y="296" width="68" height="332" rx="34" fill="#FFFFFF" opacity="0.10"></rect>
+
+  
+  <circle cx="512" cy="250" r="50" fill="#FFFFFF"></circle>
+
+  
+  <path d="M462 362 H562" stroke="#FFFFFF" stroke-width="46" stroke-linecap="round"></path>
+  <path d="M430 454 H594" stroke="#FFFFFF" stroke-width="46" stroke-linecap="round"></path>
+  <path d="M392 546 H632" stroke="#FFFFFF" stroke-width="46" stroke-linecap="round"></path>
+
+  
+  <rect x="360" y="616" width="304" height="226" rx="48" fill="#FFFFFF"></rect>
+  <rect x="404" y="664" width="216" height="130" rx="22" fill="url(#hb-bg)" opacity="0.26"></rect>
+</svg>

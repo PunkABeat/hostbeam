@@ -1,0 +1,32 @@
+{
+  "name": "@hostbeam/mcp",
+  "version": "0.1.4",
+  "description": "MCP server that lets a coding agent read the screenshots you beam to its server with Hostbeam.",
+  "type": "module",
+  "bin": {
+    "hostbeam-mcp": "hostbeam-mcp.mjs"
+  },
+  "files": [
+    "hostbeam-mcp.mjs"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "screenshot",
+    "ssh",
+    "claude-code",
+    "hostbeam"
+  ],
+  "homepage": "https://hostbeam.app/agents",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PunkABeat/hostbeam-mcp.git"
+  },
+  "author": "PunkABeat",
+  "license": "MIT",
+  "mcpName": "app.hostbeam/mcp"
+}

@@ -1,0 +1,52 @@
+codex-cli 0.159.3 · gpt-6.1-sol (high) · web search on · 2026-10-03T02:48:28Z · question E
+Q: How do I open a dev server running on a remote server in my Mac's browser when ssh -L says "administratively prohibited"?
+---
+“Administratively prohibited” usually means **the remote SSH server is rejecting port forwarding**—because of `AllowTcpForwarding`, `DisableForwarding`, `PermitOpen`, or restrictions on your SSH key. Changing settings on your Mac won’t override those restrictions. [OpenSSH documentation](https://man.openbsd.org/sshd_config)
+
+Assuming your dev server uses port **3000**, you have two practical options.
+
+**1. Enable normal SSH forwarding on the server**
+
+If you administer the server, ensure the SSH configuration applicable to your account allows:
+
+```text
+AllowTcpForwarding local
+DisableForwarding no
+```
+
+Check any `Match` blocks, `PermitOpen` rules, and restrictions in `~/.ssh/authorized_keys`. Validate with `sudo sshd -t`, then reload the SSH service and reconnect.
+
+On your Mac:
+
+```bash
+ssh -N -L 127.0.0.1:3000:127.0.0.1:3000 user@server
+```
+
+Keep that terminal open and visit **http://127.0.0.1:3000**. The dev server can remain bound to the remote server’s loopback address.
+
+**2. Relay through a normal SSH command using `socat`**
+
+If you have shell access but cannot change SSH forwarding settings, `socat` can carry the connection through SSH’s standard input/output. This requires `socat` on both machines; its upstream examples document this approach when SSH forwarding is disabled. [socat examples](https://github.com/dest-unreach/socat1/blob/master/EXAMPLES)
+
+Install it on your Mac:
+
+```bash
+brew install socat
+```
+
+First verify that the dev server responds remotely:
+
+```bash
+ssh user@server 'curl -I http://127.0.0.1:3000'
+```
+
+Then, using SSH key or agent authentication, run on your Mac:
+
+```bash
+socat TCP4-LISTEN:3000,bind=127.0.0.1,reuseaddr,fork \
+  'EXEC:ssh -T -o BatchMode=yes user@server socat STDIO TCP\:127.0.0.1\:3000'
+```
+
+Open **http://127.0.0.1:3000** in your browser. Keep the relay running; press Ctrl+C to stop it. This creates one SSH session per browser connection, so normal `ssh -L` forwarding is preferable when available.
+
+Replace `user@server` and `3000` with your actual SSH destination and dev server port.

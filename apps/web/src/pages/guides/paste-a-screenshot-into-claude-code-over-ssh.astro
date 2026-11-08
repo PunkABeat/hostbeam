@@ -1,0 +1,169 @@
+---
+import Guide from "../../layouts/Guide.astro";
+import CopyCommand from "../../components/CopyCommand.tsx";
+import { APP_STORE_URL, IPHONE_APP_LIVE } from "../../lib/links";
+
+// Every command here was run against the repo's test host (npm run testhost:up)
+// on 2026-10-03. What it says about other tools is from their own docs on that
+// date; recheck them, and bump `updated` in lib/guides.ts, when this changes.
+const SCP = `scp ~/Desktop/shot.png myserver:/tmp/shot.png`;
+const SHOT = `shot() {
+  local name="shot-$(date +%s).png"
+  pngpaste "/tmp/$name" &&
+    scp -q "/tmp/$name" "\${1:-myserver}:/tmp/$name" &&
+    printf '/tmp/%s' "$name" | pbcopy
+}`;
+---
+
+<Guide slug="paste-a-screenshot-into-claude-code-over-ssh">
+  <p class="lede">
+    When Claude Code runs on a server you reach over SSH, Ctrl+V doesn't paste your screenshot.
+    Every fix comes down to the same two steps: put the image file on the server, then give the
+    agent its path.
+  </p>
+
+  <section>
+    <h2>Why Ctrl+V doesn't work</h2>
+    <p>
+      Claude Code reads a pasted image from the clipboard of the machine it runs on. Over SSH,
+      that's the server. Your screenshot is on your Mac's clipboard, and your terminal only sends
+      the server text, so the image never arrives. Anthropic closed the request to make it work over
+      SSH as not planned (<a href="https://github.com/anthropics/claude-code/issues/42712">#42712</a>).
+    </p>
+  </section>
+
+  <section>
+    <h2>What every fix relies on: a path becomes the picture</h2>
+    <p>
+      Paste the path of an image file on the server, such as
+      <code class="mono">/tmp/shot.png</code>, and Claude Code attaches the image itself, exactly
+      as if you had pasted the picture. Codex, Gemini CLI and OpenCode do the same. So the whole job
+      is getting the file onto the server and its path into the prompt.
+    </p>
+  </section>
+
+  <section>
+    <h2>1. By hand, with scp</h2>
+    <p>
+      Fine when it happens once a day. Press <code class="mono">⌘⇧4</code> to save a screenshot to
+      the Desktop, rename it <code class="mono">shot.png</code> (macOS names it with spaces), then:
+    </p>
+    <div class="cmd"><CopyCommand command={SCP} client:visible /></div>
+    <p>
+      Paste <code class="mono">/tmp/shot.png</code> into Claude Code. Replace
+      <code class="mono">myserver</code> with the host you SSH into.
+    </p>
+  </section>
+
+  <section>
+    <h2>2. A shell function</h2>
+    <p>
+      To skip the file on the Desktop, copy the screenshot instead (<code class="mono">⌃⌘⇧4</code>)
+      and let <a href="https://github.com/jcsalterego/pngpaste">pngpaste</a> write it out
+      (<code class="mono">brew install pngpaste</code>). Put this in your
+      <code class="mono">~/.zshrc</code>:
+    </p>
+    <pre class="term">{SHOT}</pre>
+    <p>
+      Run <code class="mono">shot</code>, or <code class="mono">shot otherhost</code>, and your
+      clipboard holds the path, ready to paste. If there's no image on the clipboard or the upload
+      fails, it stops and leaves your clipboard alone.
+    </p>
+    <p>
+      It covers the everyday case. It doesn't send several screenshots at once or a file from
+      Finder, show you which host you're about to send to, or work from your phone.
+    </p>
+  </section>
+
+  <section>
+    <h2>3. Let your terminal do it</h2>
+    <ul>
+      <li>
+        <b><a rel="nofollow" href="https://cmux.com/docs/ssh">cmux</a></b>, a free, open-source Mac terminal for
+        coding agents: drop an image or a file into a remote session and it uploads it with scp over
+        the session's own connection.
+      </li>
+      <li>
+        <b><a href="https://sw.kovidgoyal.net/kitty/kittens/clipboard/">kitty</a></b>: its clipboard
+        kitten works over SSH, so <code class="mono">kitten clipboard -g shot.png</code> run on the
+        server saves your clipboard image there.
+      </li>
+      <li>
+        <b><a rel="nofollow" href="https://docs.termius.com/terminal/mobile-terminal">Termius</a></b> on iPhone
+        and Android uploads an image you paste into a session.
+      </li>
+    </ul>
+    <p>These work inside that one app, so you're tied to it.</p>
+  </section>
+
+  <section>
+    <h2>4. Keep the agent's window on your Mac</h2>
+    <ul>
+      <li>
+        <b><a href="https://code.claude.com/docs/en/desktop">Claude Desktop</a></b> can run Claude
+        Code on a remote machine over SSH, with the app as the interface. You attach or drop a
+        screenshot into its prompt as you would locally.
+      </li>
+      <li>
+        <b><a href="https://code.claude.com/docs/en/remote-control">Remote Control</a></b> lets you
+        follow a Claude Code session from the Claude app or claude.ai/code and attach photos there.
+        It needs a Pro, Max, Team or Enterprise sign-in, and isn't available with an API key, on
+        Amazon Bedrock, Google Cloud or Microsoft Foundry, through an LLM gateway, or in Zero Data
+        Retention organizations.
+      </li>
+    </ul>
+    <p>Both are Claude only.</p>
+  </section>
+
+  <section>
+    <h2>5. Hostbeam</h2>
+    <p>
+      Copy a screenshot, press <code class="mono">⌘⇧7</code>, and Hostbeam beams it to the host you
+      picked, over your own SSH, and copies its path. Paste it into any agent, in any terminal.
+    </p>
+    <ul>
+      <li>Any file too: copy it in Finder and press the shortcut, or drop it on the menu-bar icon.</li>
+      <li>Several screenshots at once arrive as several pictures in Claude Code.</li>
+      <li>
+        The host key is checked before anything is sent, a name never overwrites a file, and a
+        failed beam leaves your clipboard as it was.
+      </li>
+      {
+        IPHONE_APP_LIVE ? (
+          <li>
+            From the iPhone, share any screenshot to Hostbeam (<a href={APP_STORE_URL}>App Store</a>).
+          </li>
+        ) : (
+          <li>From the iPhone, through the share sheet, once the app is on the App Store.</li>
+        )
+      }
+      <li>
+        With the free <a href="/agents/">MCP server</a> on the host, the agent fetches your latest
+        beam itself, with nothing to paste.
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Which one to use</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>If you</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>send a screenshot now and then</td><td>scp by hand</td></tr>
+          <tr><td>want it free and don't mind a script</td><td>the shell function</td></tr>
+          <tr><td>already live in cmux or kitty</td><td>your terminal</td></tr>
+          <tr><td>use only Claude, signed in with a plan</td><td>Claude Desktop or Remote Control</td></tr>
+          <tr><td>want one shortcut for any agent and any terminal</td><td>Hostbeam</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      More apps do this than fit here:
+      <a href="/guides/mac-tools-that-send-screenshots-to-a-remote-agent/">every Mac tool for it,
+      compared</a>.
+    </p>
+  </section>
+</Guide>

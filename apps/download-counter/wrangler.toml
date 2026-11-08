@@ -1,0 +1,37 @@
+# Cloudflare Worker config for the download counter (ADR 0030).
+#
+#   npm run deploy -w @hostbeam/download-counter
+#
+# applies any new migration to the remote D1 database, then deploys. There is
+# no sandbox: the Worker only passes requests through to R2 and adds to a
+# count, so `wrangler dev` and the tests cover it.
+#
+# The routes cover the files a person or an app downloads, and `latest.json`,
+# which every running copy asks 15 seconds after launch and then once a day: its
+# daily count is how many copies are running (owner, 2026-10-06; ADR 0030
+# § 3). Bots probing `/v2/.env` and the like also reach the Worker through
+# `/v*`; they pass through to R2's 404 and are not counted.
+#
+# To stop counting without a deploy, delete the three routes in the dashboard
+# (Workers & Pages → hostbeam-download-counter → Settings → Domains & Routes):
+# R2 serves the same URLs on its own, as it did before 2026-10-06.
+name = "hostbeam-download-counter"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+workers_dev = false
+preview_urls = false
+
+routes = [
+  { pattern = "download.hostbeam.app/Hostbeam.dmg", zone_name = "hostbeam.app" },
+  { pattern = "download.hostbeam.app/v*", zone_name = "hostbeam.app" },
+  { pattern = "download.hostbeam.app/latest.json", zone_name = "hostbeam.app" },
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hostbeam-downloads"
+database_id = "7d9f4ec3-7baf-4dad-9ba8-fa0126c92168"
+migrations_dir = "migrations"
+
+[observability]
+enabled = true

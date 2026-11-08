@@ -1,0 +1,57 @@
+Site: ChatGPT (https://chatgpt.com, logged out, default settings; no model name shown in the UI)
+Question A: How do I paste a screenshot into Claude Code when it's running on a remote server over SSH?
+Timestamp: 2026-10-03 (02:38 UTC)
+Web sources cited: none (no links in the answer)
+
+--- Answer (verbatim innerText) ---
+
+If Claude Code is running on a remote server over SSH, your local screenshot isn't automatically available to the remote terminal. The easiest approach is to upload the screenshot to the server, then give Claude Code the file path.
+
+Recommended: upload the screenshot with scp
+
+On your local machine:
+
+scp ~/Desktop/screenshot.png user@your-server:~/screenshot.png
+
+
+Then, in your SSH session:
+
+claude
+
+
+and tell Claude:
+
+Please look at ~/screenshot.png
+
+
+Claude Code can then inspect the image from the remote filesystem.
+
+If you want to copy/paste directly
+
+If your terminal supports clipboard image transfer (for example, some modern terminal emulators), pasting may work locally but SSH itself doesn't transmit an image clipboard. The remote shell generally receives text, not the actual image data.
+
+A convenient workflow is:
+
+# local
+scp screenshot.png user@server:/tmp/screenshot.png
+
+
+Then:
+
+Look at /tmp/screenshot.png and tell me what's wrong.
+
+Even easier for repeated screenshots
+
+You can use rsync:
+
+rsync -av screenshot.png user@server:/tmp/
+
+
+Or, if you're taking screenshots repeatedly, set up a small local command/shortcut that uploads the current screenshot to a fixed remote path, e.g. /tmp/current.png. Then you can repeatedly tell Claude:
+
+Inspect /tmp/current.png
+
+
+If you tell me which terminal you're using (iTerm2, Terminal.app, VS Code, Windows Terminal, etc.) and whether your local machine is macOS/Windows/Linux, I can give you the fastest copy/paste-style workflow for that setup.
+
+Log in for personalized, step-by-step guidance.

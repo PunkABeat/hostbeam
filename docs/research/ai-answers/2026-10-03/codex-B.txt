@@ -1,0 +1,24 @@
+codex-cli 0.159.3 · gpt-6.1-sol (high) · web search on · 2026-10-03T02:46:16Z · question B
+Q: What's the best way to send a screenshot from my Mac to a coding agent running on a remote server?
+---
+**If you’re using SSH, my recommendation is to copy the screenshot with `scp`, then give the agent its remote file path.** If the agent has a browser or desktop interface with image attachments, uploading there is usually easier.
+
+For an SSH workflow:
+
+1. On your Mac, press **⌘⇧4** and select the area to capture. The screenshot saves to your Desktop by default. [Apple’s screenshot guide](https://support.apple.com/en-us/102646).
+2. Run this **in a local Mac terminal**, replacing the filename and server details:
+
+   ```bash
+   scp "$HOME/Desktop/Screenshot.png" user@server:/tmp/agent-screenshot.png
+   ```
+
+   `scp` transfers the file over SSH using your usual SSH authentication. An alias from `~/.ssh/config` also works in place of `user@server`. [OpenSSH documentation](https://man.openbsd.org/scp).
+3. Tell the remote agent:
+
+   > Open `/tmp/agent-screenshot.png` and inspect the layout. Fix the spacing issue shown around the navigation bar.
+
+The agent needs an image-reading tool or an image attachment feature; transferring the file alone doesn’t give it vision. If it runs inside a container, upload to a directory mounted into that container.
+
+**Pasting into an ordinary SSH terminal won’t transfer a clipboard screenshot automatically.**
+
+Which coding agent and terminal are you using? That determines whether there’s a smoother attachment or clipboard workflow.

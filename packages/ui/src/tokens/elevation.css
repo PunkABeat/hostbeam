@@ -1,0 +1,58 @@
+/* ============================================================
+   Hostbeam — Radius & elevation tokens
+   Continuous-corner geometry; restrained, layered shadows.
+   ============================================================ */
+
+:root {
+  /* --- Corner radii (continuous-feel) --------------------- */
+  --radius-xs: 3px; /* keycaps, tiny chips */
+  --radius-sm: 5px; /* badges, status pills */
+  --radius-md: 6px; /* buttons, fields, controls */
+  --radius-lg: 9px; /* list rows, thumbnails */
+  --radius-xl: 12px; /* popover, cards, menus */
+  --radius-2xl: 16px; /* first-run / large sheets */
+  --radius-full: 999px;
+
+  /* --- Elevation -------------------------------------------
+     Always pair a soft shadow with a hairline ring so edges
+     read crisply on translucent materials. */
+  --shadow-none: none;
+
+  /* control rest: barely-there lift on raised fills */
+  --shadow-control: 0 0.5px 0 rgba(var(--ink), 0.04), 0 1px 1.5px rgba(var(--ink), 0.1);
+
+  /* primary button: subtle press-ready depth */
+  --shadow-accent: 0 0.5px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(27, 90, 224, 0.35);
+
+  /* menu / dropdown */
+  --shadow-menu: 0 0 0 0.5px rgba(var(--ink), 0.12), 0 8px 24px rgba(var(--ink), 0.16);
+
+  /* the menu-bar popover itself */
+  --shadow-popover:
+    0 0 0 0.5px rgba(var(--ink), 0.14), 0 12px 36px rgba(var(--ink), 0.2),
+    0 2px 8px rgba(var(--ink), 0.1);
+
+  /* The same popover, when it IS the window: the menu-bar panel's card. Its
+     shadow has to fade out inside the window's transparent margin, since
+     macOS clips anything past the window edge — hence a tighter blur than
+     --shadow-popover, which is drawn inside a roomy parent window. Keep it
+     within .hb-wrap's padding (apps/desktop/src/app.css). */
+  --shadow-popover-panel:
+    0 0 0 0.5px rgba(var(--ink), 0.14), 0 6px 18px rgba(var(--ink), 0.2),
+    0 2px 6px rgba(var(--ink), 0.1);
+
+  /* recessed well (inset) */
+  --shadow-inset: inset 0 1px 2px rgba(var(--ink), 0.08);
+
+  /* focus ring — accent halo, no layout shift */
+  --ring-focus: 0 0 0 3px var(--focus-ring);
+}
+
+.theme-dark {
+  --shadow-control: 0 0.5px 0 rgba(255, 255, 255, 0.06) inset, 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-accent: 0 0.5px 0 rgba(255, 255, 255, 0.22) inset, 0 1px 3px rgba(0, 0, 0, 0.55);
+  --shadow-menu: 0 0 0 0.5px rgba(0, 0, 0, 0.6), 0 10px 28px rgba(0, 0, 0, 0.55);
+  --shadow-popover: 0 0 0 0.5px rgba(0, 0, 0, 0.65), 0 16px 44px rgba(0, 0, 0, 0.6);
+  --shadow-popover-panel: 0 0 0 0.5px rgba(0, 0, 0, 0.65), 0 8px 20px rgba(0, 0, 0, 0.6);
+  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.45);
+}

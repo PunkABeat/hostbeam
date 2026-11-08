@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["U3C6XC6LHJ.app.hostbeam.ios.Hostbeam"],
+        "components": [
+          {
+            "/": "/add",
+            "comment": "Share to iPhone: the Mac's pairing QR. The host's details are in the fragment."
+          },
+          { "/": "/add/" }
+        ]
+      }
+    ]
+  }
+}

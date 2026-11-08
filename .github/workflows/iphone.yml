@@ -1,0 +1,65 @@
+# The iPhone app (apps/mobile), on a macOS runner. By hand only: a macOS
+# minute counts ten against the account's 2,000 free Actions minutes a month.
+# Run it before an App Store build (scripts/release-ios.sh) or whenever a
+# clean machine's answer is worth 40 minutes:
+#   gh workflow run iphone.yml --ref main
+# Making it cheap enough for every push again: docs/process/ci.md.
+# Actions are pinned to commits; update the SHA, not the tag.
+name: iphone
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: iphone-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  iphone:
+    # Until this job the app, its extensions and its widget were compiled only
+    # on the owner's Mac, and a change that broke one of them was found on the
+    # phone. Unsigned: CI proves it builds; the signed build and the install
+    # are still the device's job.
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # The newest Xcode 26 the runner has, else its default: the Swift the
+      # App Store builds are made with, and the swift-format version the tree
+      # was formatted with (two versions can disagree about a line).
+      - name: Select Xcode
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$X" ]; then sudo xcode-select -s "$X"; fi
+          xcodebuild -version
+          swift format --version
+
+      - name: Formatting
+        working-directory: apps/mobile
+        run: git ls-files '*.swift' | xargs swift format lint --strict --configuration .swift-format
+
+      - name: Engine tests
+        working-directory: apps/mobile/BeamEngine
+        run: swift test
+
+      - name: Generate the Xcode project
+        working-directory: apps/mobile
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      # `test` builds every target in the scheme — the app, both extensions,
+      # the widgets — and then runs AppTests/ in the app on a simulator. The
+      # newest iPhone simulator the runner has, by udid, so a runner image
+      # update cannot break the job over a device name.
+      - name: Build every target and run the app tests
+        working-directory: apps/mobile
+        run: |
+          UDID=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print(next(x["udid"] for r,v in sorted(d.items(), reverse=True) if "iOS" in r for x in v if x["name"].startswith("iPhone")))')
+          xcodebuild -project Hostbeam.xcodeproj -scheme Hostbeam \
+            -destination "id=$UDID" -derivedDataPath dd-ci \
+            CODE_SIGNING_ALLOWED=NO test
+
+      # Reads what the build just extracted (SWIFT_EMIT_LOC_STRINGS in
+      # project.yml), so a string added without its translations fails here.
+      - name: Every string is translated
+        run: node scripts/check-ios-strings.mjs apps/mobile/dd-ci

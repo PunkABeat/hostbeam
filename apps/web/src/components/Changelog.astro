@@ -1,0 +1,187 @@
+---
+import changelogText from "../../../../CHANGELOG.md?raw";
+import Base from "../layouts/Base.astro";
+import Nav from "./Nav.tsx";
+import Footer from "./Footer.astro";
+import {
+  CHANGELOG_PATH,
+  parseChangelog,
+  parseSections,
+  PLATFORM_LABEL,
+  releaseAnchor,
+} from "../../../../scripts/changelog-parse.mjs";
+
+// One changelog, three addresses. /changelog/ has every release; /changelog/mac/
+// and /changelog/iphone/ have one app's, and are what each app opens, at the
+// anchor of the version it runs (#mac-0.1.20, #iphone-1.0). They are real pages
+// rather than a filter on one page, so a link can name them and they need no
+// script.
+interface Props {
+  lane: "all" | "mac" | "iphone";
+}
+const { lane } = Astro.props;
+
+const all = parseChangelog(changelogText)
+  .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+  .map((r) => ({
+    ...r,
+    ...parseSections(r.body),
+    anchor: releaseAnchor(r),
+    human: new Date(r.date).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    }),
+  }));
+
+const present = new Set(all.map((r) => r.platform));
+const lanes = (["mac", "iphone"] as const).filter((p) => present.has(p));
+// Tabs, and each release's app label, only once there is a second app to tell
+// apart. Before the iPhone ships the site does not advertise its lane.
+const showLanes = lanes.length > 1;
+const releases = lane === "all" ? all : all.filter((r) => r.platform === lane);
+const label = lane === "all" ? null : PLATFORM_LABEL[lane];
+const tabs = [
+  { href: "/changelog/", text: "All", current: lane === "all" },
+  ...lanes.map((p) => ({ href: CHANGELOG_PATH[p], text: PLATFORM_LABEL[p], current: lane === p })),
+];
+---
+
+<Base
+  title={label ? `${label} changelog · Hostbeam` : "Changelog · Hostbeam"}
+  description={label
+    ? `What changed in Hostbeam for ${label}, release by release.`
+    : "What changed in Hostbeam, release by release — for the Mac app and the iPhone companion."}
+  noindex={releases.length === 0}
+>
+  <div class="site">
+    <Nav />
+
+    <main style="padding: 72px 0 96px">
+      <div class="wrap" style="max-width: 680px">
+        <h1 class="h2" style="margin-top: 12px">
+          {label ? `What's changed on the ${label}.` : "What's changed."}
+        </h1>
+        <p class="sub" style="margin: 16px 0 0">
+          Every release, newest first. Everyone gets every update, and a license covers all of
+          Hostbeam 1.
+        </p>
+
+        <div class="cl">
+          {
+            showLanes && (
+              <nav class="cl-tabs" aria-label="Show releases for">
+                {tabs.map((tab) => (
+                  <a href={tab.href} aria-current={tab.current ? "page" : undefined}>
+                    {tab.text}
+                  </a>
+                ))}
+              </nav>
+            )
+          }
+
+          {
+            releases.length === 0 && (
+              <p class="sub" style="margin: 48px 0 0">No {label} releases yet.</p>
+            )
+          }
+
+          {
+            releases.map((rel) => (
+              <section id={rel.anchor} class="cl-rel" style="margin-top: 56px">
+                <div
+                  style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--separator)"
+                >
+                  <h2 style="font-size: 19px; font-weight: 600; margin: 0; letter-spacing: -0.01em; color: var(--ink)">
+                    {showLanes && lane === "all" && (
+                      <span class="cl-app">{PLATFORM_LABEL[rel.platform]}</span>
+                    )}
+                    {rel.version}
+                  </h2>
+                  <span class="note">{rel.human}</span>
+                </div>
+
+                {rel.intro && (
+                  <p style="font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); margin: 18px 0 0">
+                    {rel.intro}
+                  </p>
+                )}
+
+                {rel.sections.map((sec) => (
+                  <div style="margin-top: 22px">
+                    {sec.title && (
+                      <h3 style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label-tertiary); margin: 0 0 10px">
+                        {sec.title}
+                      </h3>
+                    )}
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px">
+                      {sec.items.map((item) => (
+                        <li
+                          style="font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); text-wrap: pretty; padding-left: 16px; position: relative"
+                        >
+                          <span
+                            aria-hidden="true"
+                            style="position: absolute; left: 0; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--beam)"
+                          />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </section>
+            ))
+          }
+        </div>
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+</Base>
+
+<style>
+  .cl-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 34px;
+  }
+  .cl-tabs a {
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition:
+      background 120ms ease,
+      color 120ms ease,
+      border-color 120ms ease;
+  }
+  .cl-tabs a:hover {
+    border-color: var(--ink-faint);
+  }
+  .cl-tabs a[aria-current="page"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .cl-tabs a:focus-visible {
+    outline: 2px solid var(--beam);
+    outline-offset: 2px;
+  }
+
+  /* A link to #mac-0.1.20 lands with the heading below the sticky nav. */
+  .cl-rel {
+    scroll-margin-top: 88px;
+  }
+
+  .cl-app {
+    color: var(--ink-faint);
+    font-weight: 500;
+    margin-right: 7px;
+  }
+</style>

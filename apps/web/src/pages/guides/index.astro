@@ -1,0 +1,71 @@
+---
+import Base from "../../layouts/Base.astro";
+import Nav from "../../components/Nav.tsx";
+import Footer from "../../components/Footer.astro";
+import { GUIDES, guidePath } from "../../lib/guides";
+---
+
+<Base
+  title="Guides · Hostbeam"
+  description="Working with a coding agent that runs on a server: getting a screenshot to it, opening what it builds, and every way to do each, Hostbeam included."
+>
+  <div class="site" id="top">
+    <Nav />
+    <main class="wrap guides">
+      <h1 class="h2">Guides</h1>
+      <p class="lede">
+        Working with a coding agent that runs on a server. Each guide covers every way to do the
+        job, Hostbeam included.
+      </p>
+      <ul class="guide-list">
+        {
+          GUIDES.map((g) => (
+            <li>
+              <a href={guidePath(g.slug)}>{g.title}</a>
+              <p>{g.description}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<style>
+  .guides {
+    max-width: 720px;
+    padding-top: 64px;
+    padding-bottom: 96px;
+  }
+  .guides h1 {
+    font-size: clamp(32px, 4.5vw, 48px);
+  }
+  .guide-list {
+    list-style: none;
+    padding: 0;
+    margin: 40px 0 0;
+  }
+  .guide-list li {
+    padding: 22px 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .guide-list li:last-child {
+    border-bottom: 1px solid var(--hairline);
+  }
+  .guide-list a {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .guide-list a:hover {
+    color: var(--beam);
+  }
+  .guide-list p {
+    margin: 8px 0 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+</style>

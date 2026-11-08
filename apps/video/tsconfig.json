@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "lib": ["DOM", "ES2022"],
+    "paths": {
+      "@hostbeam/ui": ["../../packages/ui/src/components/index.ts"],
+      "react": ["./node_modules/@types/react"]
+    }
+  },
+  "include": ["src", "remotion.config.ts"]
+}

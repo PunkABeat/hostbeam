@@ -1,0 +1,65 @@
+/* ============================================================
+   App-level utility classes — UI detach E6 styling pass.
+
+   These replace repeated *standalone* inline style objects that
+   appeared verbatim across the app-owned screens (popover /
+   onboarding / preferences). Each declaration is byte-identical
+   to the inline style it replaced, so the extraction is
+   pixel-preserving; it only removes duplication.
+
+   Scope is deliberately narrow: only styles that appeared as the
+   element's ENTIRE style object (a clean 1:1 swap) are lifted.
+   Composite one-off styles and dynamic (state-derived) values
+   stay inline, per the detach plan's definition of done.
+
+   Loaded last in each window entry so a utility wins on a
+   source-order tie with a design-system base rule at equal
+   specificity (there are no such conflicts today; this is
+   defensive).
+   ============================================================ */
+
+/* Flex spacer: pushes trailing content to the end of a row. */
+.hb-push {
+  margin-left: auto;
+}
+
+/* Monospace runs (paths, filenames, accelerators). */
+.hb-mono {
+  font-family: var(--font-mono);
+}
+
+/* Semantic foreground colors (single-property).
+   On the inline SVG icon (Ic) these drive stroke via currentColor. */
+.hb-fg-secondary {
+  color: var(--label-secondary);
+}
+.hb-fg-tertiary {
+  color: var(--label-tertiary);
+}
+.hb-fg-quaternary {
+  color: var(--label-quaternary);
+}
+.hb-fg-success {
+  color: var(--success);
+}
+.hb-fg-danger {
+  color: var(--danger);
+}
+.hb-fg-warning {
+  color: var(--warning);
+}
+.hb-fg-accent {
+  color: var(--accent);
+}
+
+/* Intentional on-color glyph fill (white icon over a colored tile /
+   accent surface) — a deliberate literal, not a themeable token. */
+.hb-fg-white {
+  color: #fff;
+}
+
+/* Accent-emphasized inline text (host / path highlights). */
+.hb-accent-strong {
+  color: var(--accent);
+  font-weight: 600;
+}

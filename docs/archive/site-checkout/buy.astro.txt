@@ -1,0 +1,105 @@
+---
+// The Paddle "default payment link" page (ADR 0014). Paddle payment links open
+// `<this page>?_ptxn=<transaction id>`; Paddle.js sees `_ptxn` and pops the
+// checkout overlay automatically. Without `_ptxn` it opens a checkout for the
+// license price directly, so /buy doubles as the pricing page's Buy target.
+// On completion we redirect to /thanks, which fetches the license key.
+import Base from "../layouts/Base.astro";
+import {
+  LICENSE_API,
+  PADDLE_CLIENT_TOKEN,
+  PADDLE_ENV,
+  PADDLE_PRICE_ID,
+  SANDBOX_HOSTS,
+} from "../lib/checkout";
+---
+
+<Base
+  title="Buy · Hostbeam"
+  description="Pay once to hide the reminder and support Hostbeam. One license covers up to 3 Macs, with every Hostbeam 1 update included."
+>
+  <div class="site" style="min-height: 100vh; display: flex; align-items: center; justify-content: center">
+    <div class="wrap" style="text-align: center; max-width: 480px">
+      <img src="/assets/hostbeam-icon.svg" width="56" height="56" alt="" style="border-radius: 14px" />
+      <h1 class="h2" style="margin-top: 20px">Opening checkout…</h1>
+      <p class="sub" style="margin: 12px auto 0">
+        $29 · one-time · up to 3 Macs · every Hostbeam 1 update included.
+      </p>
+      <p id="fallback" style="display: none; font-size: 13.5px; color: var(--label-tertiary); margin-top: 20px">
+        Checkout didn’t open? <a id="retry" href="#" style="color: var(--accent)">Try again</a>
+        or email <a href="mailto:support@hostbeam.app" style="color: var(--accent)">support@hostbeam.app</a>.
+      </p>
+      {/* The checkout page carries the policies itself: it has no site footer,
+          it is the Paddle default-payment-link target, and a buyer about to pay
+          should not have to navigate away to find the refund terms. */}
+      <p style="font-size: 12.5px; color: var(--label-tertiary); margin-top: 28px">
+        <a href="/terms/" style="color: inherit">Terms</a> ·
+        <a href="/privacy/" style="color: inherit">Privacy</a> ·
+        <a href="/refunds/" style="color: inherit">Refunds</a>
+      </p>
+    </div>
+  </div>
+
+  {/* No SRI hash on purpose: Paddle.js is a rolling release the payment
+      provider updates in place (like Stripe.js) — a pinned integrity hash
+      would hard-break checkout on their next deploy. Trust boundary is
+      cdn.paddle.com itself, which the checkout already depends on. */}
+  <script is:inline src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+  <script
+    is:inline
+    define:vars={{ env: PADDLE_ENV, token: PADDLE_CLIENT_TOKEN, priceId: PADDLE_PRICE_ID, licenseApi: LICENSE_API, sandboxHosts: SANDBOX_HOSTS }}
+  >
+    (() => {
+      // Sandbox guard: sandbox accepts universal test cards, so a public /buy
+      // running against it would let anyone mint a Keygen license for free.
+      // Allowed on localhost, plus any host named in PUBLIC_PADDLE_SANDBOX_HOSTS
+      // (a staging deploy). Never reached by a production build.
+      const allowedSandboxHosts = ["localhost", "127.0.0.1"].concat(sandboxHosts || []);
+      if (env === "sandbox" && !allowedSandboxHosts.includes(location.hostname)) {
+        document.querySelector("h1").textContent = "Checkout isn’t open yet.";
+        document.querySelector(".sub").textContent =
+          "Hostbeam is almost ready. Check back soon.";
+        return;
+      }
+      if (!token) {
+        document.getElementById("fallback").style.display = "block";
+        console.error("PADDLE_CLIENT_TOKEN is not set (apps/web/src/lib/checkout.ts)");
+        return;
+      }
+      // Live is Paddle.js's default; this only ever fires on a sandbox build.
+      if (env === "sandbox") Paddle.Environment.set("sandbox");
+      Paddle.Initialize({
+        token,
+        eventCallback(ev) {
+          // Deterministic success hop: grab the transaction id from the
+          // completed event and land on /thanks, which polls the key API.
+          if (ev.name === "checkout.completed") {
+            const txn = ev.data && ev.data.transaction_id;
+            setTimeout(() => {
+              window.location.href = "/thanks" + (txn ? "?transaction_id=" + txn : "");
+            }, 1200); // let Paddle's own "payment successful" beat land first
+          }
+        },
+      });
+
+      // `_ptxn` (a Paddle payment link) auto-opens the checkout; otherwise
+      // open one for the license price.
+      const hasTxn = new URLSearchParams(location.search).has("_ptxn");
+      const openDirect = () => {
+        if (!priceId) {
+          document.getElementById("fallback").style.display = "block";
+          console.error("PADDLE_PRICE_ID is not set (apps/web/src/lib/checkout.ts)");
+          return;
+        }
+        Paddle.Checkout.open({ items: [{ priceId, quantity: 1 }] });
+      };
+      if (!hasTxn) openDirect();
+      document.getElementById("retry").addEventListener("click", (e) => {
+        e.preventDefault();
+        openDirect();
+      });
+      // Surface the manual fallback after a beat either way.
+      setTimeout(() => (document.getElementById("fallback").style.display = "block"), 6000);
+    })();
+  </script>
+</Base>

@@ -1,0 +1,24 @@
+codex-cli 0.159.3 · gpt-6.1-sol (high) · web search on · 2026-10-03T02:47:17Z · question C
+Q: How do I send a screenshot from my iPhone to Claude Code running on my server?
+---
+The easiest way is **Claude Code’s Remote Control**: attach the screenshot from your iPhone directly to the session running on your server.
+
+1. In your existing Claude Code session on the server, enter:
+   ```text
+   /remote-control
+   ```
+   Accept the first-time enable prompt.
+
+2. On your iPhone, open the displayed session link, or open the **Claude app → Code** and select that session. Sign in with the same Claude account.
+
+3. Use the attachment button to select your screenshot from Photos, add your instructions, and send.
+
+Claude receives the image in the same conversation, while code execution stays on your server. Keep the Claude Code process running. Remote Control requires a Pro, Max, Team, or Enterprise subscription; API-key authentication isn’t supported. [Official Remote Control guide](https://code.claude.com/docs/en/remote-control)
+
+**If you use API-key authentication or prefer SSH:** save the screenshot to Files on your iPhone, upload it to the server using an SFTP client, then tell Claude Code:
+
+```text
+Read /home/youruser/screenshots/issue.png and fix the layout shown.
+```
+
+Claude Code supports reading images by file path—the path must point to the uploaded file on your server. [Image input documentation](https://code.claude.com/docs/en/common-workflows#work-with-images)

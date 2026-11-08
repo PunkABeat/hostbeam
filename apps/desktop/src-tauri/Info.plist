@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Merged into the bundle's Info.plist by Tauri at build time.
+
+  One scheme, hostbeam://, so a script, a Raycast command or the agent itself
+  can start a beam without a keystroke (ADR 0025). Anything that can open a URL
+  can open this one, including a web page — which is why the app ignores it
+  unless Preferences → General → Beaming says otherwise.
+-->
+<plist version="1.0">
+<dict>
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLName</key>
+      <string>app.hostbeam.url</string>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>hostbeam</string>
+      </array>
+    </dict>
+  </array>
+</dict>
+</plist>

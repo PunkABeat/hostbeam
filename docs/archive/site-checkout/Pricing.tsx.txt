@@ -1,0 +1,80 @@
+import { Ic } from "@hostbeam/ui";
+import { DMG_URL } from "../lib/links";
+
+// Pricing (ADR 0014 / 0028): every feature free with no limit, on the Mac and
+// the iPhone; the Mac asks now and then for a $29 one-time license — up to 3
+// Macs, every Hostbeam 1 update included; a future Hostbeam 2 is a discounted
+// upgrade. The iPhone app is free and sells nothing. The buy button goes to /buy, which opens the Paddle
+// checkout for whichever environment the build is configured for.
+//
+// One plate, two columns, neither one highlighted. Two glowing tier cards is
+// the grammar of software that bills every month, and this does not; but the
+// terms stay in full, because "what do I get, and for how long" is the actual
+// question a buyer of a one-person Mac tool is asking.
+export default function Pricing() {
+  const freePoints = [
+    "Every feature, no limit, on the Mac and the iPhone",
+    "No account, fully offline, all your SSH hosts",
+    "On the Mac, a gentle reminder now and then; it never blocks a beam",
+  ];
+  const paidPoints = [
+    "Hides the reminder and supports development",
+    "Covers up to 3 Macs; the iPhone app is free anyway",
+    "Every Hostbeam 1 update included; the app never stops working",
+    "A future Hostbeam 2 will be a discounted upgrade",
+  ];
+  return (
+    <section
+      id="pricing"
+      style={{
+        padding: "84px 0",
+        background: "color-mix(in srgb, var(--paper-raised) 55%, var(--paper))",
+        borderTop: "1px solid var(--hairline)",
+      }}
+    >
+      <div className="wrap">
+        <h2 className="h2" style={{ textAlign: "center" }}>Try it free. Pay once if it sticks.</h2>
+        <p className="sub" style={{ textAlign: "center", margin: "16px auto 0" }}>
+          Hostbeam is free to try for as long as you like. If you keep using it, please buy a
+          license. No subscription, no account.
+        </p>
+
+        <div className="tiers">
+          <div className="tier">
+            <p className="tier-name">Free</p>
+            <p className="tier-price">$0<small>for as long as you like</small></p>
+            <ul>
+              {freePoints.map((t) => <li key={t}>{t}</li>)}
+            </ul>
+            <div className="tier-cta">
+              <a className="btn btn-ghost" href={DMG_URL} style={{ width: "100%" }}>
+                <Ic name="upload" size={16} /> Download free
+              </a>
+            </div>
+          </div>
+
+          <div className="tier">
+            <p className="tier-name">License</p>
+            <p className="tier-price">$29<small>once, if you keep using it</small></p>
+            <ul>
+              {paidPoints.map((t) => <li key={t}>{t}</li>)}
+            </ul>
+            <div className="tier-cta">
+              {/* /buy opens the Paddle checkout. Which Paddle it talks to is a
+                  build-time decision (PUBLIC_PADDLE_ENV, see lib/checkout.ts);
+                  a sandbox build shows a "not open yet" notice instead of a
+                  checkout, so this link is safe to ship before go-live. */}
+              <a className="btn btn-primary" href="/buy/" style={{ width: "100%" }}>
+                <Ic name="zap" size={16} /> Buy Hostbeam
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <p className="note" style={{ textAlign: "center", marginTop: 20 }}>
+          Your key arrives by email right after checkout. Paste it into Hostbeam on your Mac and the reminder is gone.
+        </p>
+      </div>
+    </section>
+  );
+}

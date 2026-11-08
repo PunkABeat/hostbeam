@@ -1,0 +1,111 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Hostbeam",
+  "version": "0.1.35",
+  "identifier": "com.hostbeam.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "label": "popover",
+        "title": "Hostbeam",
+        "width": 388,
+        "height": 540,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "resizable": false,
+        "shadow": false,
+        "visible": false
+      },
+      {
+        "label": "hud",
+        "title": "Hostbeam",
+        "url": "hud.html",
+        "width": 360,
+        "height": 120,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "resizable": false,
+        "shadow": false,
+        "focus": false,
+        "visible": false
+      }
+    ],
+    "security": {
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$APPCACHE/thumbs/*"]
+      },
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: data:; font-src 'self'; connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; base-uri 'self'; frame-ancestors 'none'",
+      "devCsp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: data:; font-src 'self'; connect-src 'self' ipc: http://ipc.localhost ws://localhost:1420 http://localhost:1420; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDMwNjJBODFFRDc0ODBFODUKUldTRkRralhIcWhpTUg3RjlKSG5ibGdPNDdIVW45TEhZa1RJb3o0UTdpSm45NC8rMDZmOGdYRnYK",
+      "endpoints": [
+        "https://download.hostbeam.app/latest.json"
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "app"
+    ],
+    "createUpdaterArtifacts": true,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "publisher": "Hostbeam",
+    "copyright": "\u00a9 2026 Hostbeam",
+    "category": "DeveloperTool",
+    "shortDescription": "Beam a screenshot straight to your server.",
+    "longDescription": "Hostbeam is a macOS menu-bar utility for developers running remote coding agents: copy a screenshot, press one hotkey, and it lands on the SSH host you choose \u2014 with a paste-ready sentence for your agent on the clipboard. Any file you hand it works the same way. Uses your existing ~/.ssh/config and keys; no account, no cloud in the middle.",
+    "macOS": {
+      "minimumSystemVersion": "13.0"
+    },
+    "fileAssociations": [
+      {
+        "ext": [
+          "png",
+          "jpg",
+          "jpeg",
+          "gif",
+          "webp",
+          "heic",
+          "heif",
+          "avif",
+          "tif",
+          "tiff",
+          "bmp"
+        ],
+        "name": "Image",
+        "role": "Viewer",
+        "mimeType": "image/*"
+      },
+      {
+        "ext": [],
+        "contentTypes": ["public.data"],
+        "name": "File",
+        "role": "Viewer",
+        "rank": "None"
+      }
+    ]
+  }
+}

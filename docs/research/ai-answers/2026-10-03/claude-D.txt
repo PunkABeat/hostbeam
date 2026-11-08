@@ -1,0 +1,21 @@
+Claude Code 2.1.288 (Claude Code) · 2026-10-03T02:46:36Z · question D
+Q: Is there a Mac app that sends screenshots to Claude Code over SSH?
+---
+Yes, there are several. They all work the same way: the screenshot gets uploaded to the remote machine over SSH, and the remote file path is copied to your clipboard. You then paste that path into your remote Claude Code session.
+
+- **[Paste2SSH](https://paste2ssh.com/)** is a free native Mac utility that does exactly this and is the most polished option.
+- **[claude-screenshot-uploader](https://github.com/mdrzn/claude-screenshot-uploader)** is a menu bar app that runs through xbar. It uploads your macOS screenshots to the server and puts the remote path on your clipboard.
+- **[clipssh](https://github.com/samuellawrentz/clipssh)** ([fork](https://github.com/drinkspiller/clipssh)) is a command-line tool. It sends a clipboard screenshot to a remote host and copies the path, and it also works with OpenCode and other terminal tools.
+- **[Image Paste for Remote SSH](https://marketplace.visualstudio.com/items?itemName=asfeng.claude-code-image-paste)** is a VS Code extension for when you run Claude Code in a VS Code Remote-SSH terminal. It saves the image to `/tmp/screenshots/` on the remote machine and pastes the path straight into the terminal.
+
+There's also a [Medium write-up](https://medium.com/@ooi_yee_fei/automated-screenshot-uploader-for-remote-claude-macos-e437a8810277) on building your own automated version if you'd rather roll your own.
+
+If you want a plain Mac app, start with Paste2SSH. If you work in VS Code Remote-SSH, the extension removes the paste step.
+
+Sources:
+- [Paste2SSH](https://paste2ssh.com/)
+- [mdrzn/claude-screenshot-uploader](https://github.com/mdrzn/claude-screenshot-uploader)
+- [samuellawrentz/clipssh](https://github.com/samuellawrentz/clipssh)
+- [drinkspiller/clipssh](https://github.com/drinkspiller/clipssh)
+- [Image Paste for Remote SSH (VS Code Marketplace)](https://marketplace.visualstudio.com/items?itemName=asfeng.claude-code-image-paste)
+- [Automated Screenshot Uploader for Remote Claude (Medium)](https://medium.com/@ooi_yee_fei/automated-screenshot-uploader-for-remote-claude-macos-e437a8810277)

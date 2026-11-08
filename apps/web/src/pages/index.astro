@@ -1,0 +1,98 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.tsx";
+import HeroDemo from "../components/HeroDemo.tsx";
+import AgentMoment from "../components/AgentMoment.tsx";
+import HowItWorks from "../components/HowItWorks.tsx";
+import IphoneApp from "../components/IphoneApp.tsx";
+import Features from "../components/Features.tsx";
+import Privacy from "../components/Privacy.tsx";
+import Pricing from "../components/Pricing.tsx";
+import Faq from "../components/Faq.tsx";
+import Download from "../components/Download.astro";
+import CopyCommand from "../components/CopyCommand.tsx";
+import FilmLink from "../components/FilmLink.tsx";
+import Footer from "../components/Footer.astro";
+import { Ic } from "@hostbeam/ui";
+import { BREW_COMMAND, DMG_URL } from "../lib/links";
+import { homeJsonLd } from "../lib/seo";
+---
+
+<Base
+  title="Hostbeam · Beam a screenshot straight to your server"
+  description="Copy a screenshot on your Mac or share one from your iPhone, or hand it any file. Hostbeam drops it on your SSH host; paste the path it copies and your coding agent gets the picture itself."
+  jsonLd={homeJsonLd(String(Astro.site ?? Astro.url.origin))}
+>
+  <div class="site">
+    <Nav />
+
+    <header id="top" style="padding-top: 72px; padding-bottom: 72px">
+      <div class="wrap hero-grid">
+        <div>
+          {/* The launch message (docs/process/launch-day.md, decided 2026-10-03),
+              one sentence a line, with the film's blue on the words that carry
+              it. The page title and description keep the words people search
+              for — screenshot, server, SSH — which the tagline does not. */}
+          <h1 class="display">
+            <span class="display-line">Agent on a <span class="display-accent">server?</span></span>
+            <span class="display-line">Show it <span class="display-accent">anything.</span></span>
+            <span class="display-line">See what it <span class="display-accent">built.</span></span>
+          </h1>
+          <p class="lede">
+            Hostbeam links your Mac and iPhone to the server your coding agent runs on. Send it
+            screenshots and files, and open the app it's building on your Mac. Over your own SSH,
+            free.
+          </p>
+          {/* Kept identical to the three claims the privacy diagram makes, and
+              deliberately narrower than "nothing leaves your Mac": the updater
+              and the licence check are real requests, so the page claims the
+              absence of a middleman, not the absence of traffic. */}
+          <ul class="claims">
+            <li>No account</li>
+            <li>No relay</li>
+            <li>No telemetry</li>
+          </ul>
+          <div
+            class="hero-cta"
+            style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; align-items: center"
+          >
+            <a class="btn btn-primary" href={DMG_URL}><Ic name="upload" size={17} /> Download for macOS</a>
+            {/* Deliberately scrolls to the iPhone section rather than the
+                App Store, even after launch: this sits above the fold, before
+                the reader knows what the iPhone app does, and the section it
+                lands on carries its own store button. The bottom CTA in
+                Download.astro is the one that links out. */}
+            <a class="btn btn-ink" href="#iphone"><Ic name="smartphone" size={16} /> The iPhone companion</a>
+            <FilmLink client:idle />
+          </div>
+          {/* The same "or" line the download section closes with, so the page
+              teaches one pattern: the DMG for most, the cask for whoever lives
+              in a terminal. Both read BREW_COMMAND, so they cannot drift. */}
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px">
+            <span class="note">or</span>
+            <CopyCommand command={BREW_COMMAND} client:visible />
+          </div>
+          <p class="note" style="margin-top: 14px">
+            Free to use, with no limit. macOS 13 and later; the iPhone app needs iOS 17.
+          </p>
+        </div>
+        <div class="hero-visual">
+          <HeroDemo client:visible />
+          <p class="note" style="text-align: center; margin: 20px 0 0">
+            Live demo — press <span style="color: var(--ink); font-weight: 500">Beam screenshot</span> above.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <AgentMoment />
+    <IphoneApp client:visible />
+    <HowItWorks />
+    <Features />
+    <Privacy />
+    <Pricing />
+    <Faq />
+    <Download />
+    <Footer tinyshelf />
+  </div>
+</Base>

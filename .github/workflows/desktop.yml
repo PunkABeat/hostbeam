@@ -1,0 +1,64 @@
+# The Mac app's gates (docs/engineering.md), on a macOS runner. By hand only:
+# a macOS minute counts ten against the account's 2,000 free Actions minutes a
+# month, and running this on every push spent them in three and a half days.
+# Run it before a release (docs/process/releasing-macos.md) or whenever a clean
+# machine's answer is worth 20 minutes:
+#   gh workflow run desktop.yml --ref main
+# Making it cheap enough for every push again: docs/process/ci.md.
+# Actions are pinned to commits (Tauri's lifecycle guidance); update the SHA,
+# not the tag.
+name: desktop
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    # macOS: the Rust core links AppKit (tauri-nspanel, objc) and does not
+    # build anywhere else yet — see docs/process/desktop-code-review-2026-09.md § D.
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      # The toolchain rust-toolchain.toml names, so CI and a developer's Mac
+      # run the same compiler and the same clippy — a newer stable's lints
+      # failed the first run here while the Mac was clean.
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # stable
+        with:
+          toolchain: 1.93.0
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: apps/desktop/src-tauri
+
+      - run: npm ci
+
+      - name: Frontend gates
+        run: |
+          npm run typecheck
+          npm run lint
+          npm run test
+          npm run format:check
+          npm run build
+
+      - name: Rust gates
+        working-directory: apps/desktop/src-tauri
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets --locked -- -D warnings
+          cargo test --locked
+
+      # The notices check covers the iPhone too, from BeamEngine's resolved
+      # packages, which only exist once Swift has fetched them.
+      - name: Resolve the iPhone's Swift packages
+        working-directory: apps/mobile/BeamEngine
+        run: swift package resolve
+
+      - name: Notices are current
+        run: npm run check:notices

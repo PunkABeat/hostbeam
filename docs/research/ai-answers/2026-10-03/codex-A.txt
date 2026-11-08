@@ -1,0 +1,29 @@
+codex-cli 0.159.3 · gpt-6.1-sol (high) · web search on · 2026-10-03T02:45:36Z · question A
+Q: How do I paste a screenshot into Claude Code when it's running on a remote server over SSH?
+---
+**Plain SSH doesn’t forward your local image clipboard.** Upload the screenshot, then give Claude Code its path on the server.
+
+1. Save the screenshot as `screenshot.png`.
+2. In a **local terminal**, run:
+
+   ```bash
+   scp "/path/to/screenshot.png" user@server:/tmp/screenshot.png
+   ```
+
+3. In your remote Claude Code session, enter:
+
+   ```text
+   Read /tmp/screenshot.png and help me diagnose this issue.
+   ```
+
+Claude Code officially supports images supplied by file path. [Documentation](https://code.claude.com/docs/en/common-workflows#work-with-images)
+
+**If the screenshot is already on your Mac’s clipboard**, use [`pngpaste`](https://github.com/jcsalterego/pngpaste) locally:
+
+```bash
+brew install pngpaste  # once
+pngpaste /tmp/screenshot.png &&
+  scp /tmp/screenshot.png user@server:/tmp/screenshot.png
+```
+
+For frequent use, [`claude-ssh-image-skill`](https://github.com/AlexZeitler/claude-ssh-image-skill) provides a clipboard bridge through an SSH tunnel, letting you use `/paste-image` in the remote session.

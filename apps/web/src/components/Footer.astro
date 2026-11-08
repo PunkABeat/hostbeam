@@ -1,0 +1,119 @@
+---
+// The footer also answers the one question a feature list cannot: whether a
+// one-person tool is still being worked on. It answers it with the only
+// evidence that counts — the release count, taken at build time from the same
+// CHANGELOG.md the Mac app's updater reads, so it cannot quietly go stale.
+//
+// Deliberately a line in the footer rather than a section of its own: a page
+// that visibly asks to be trusted is doing the opposite of what this product's
+// voice does.
+//
+// An .astro component because it reads the changelog at build time. `?raw`
+// has the bundler resolve the path from this source file; a path worked out
+// from import.meta.url at run time depends on where the build put its chunks,
+// and Astro 7 moved them.
+import changelogText from "../../../../CHANGELOG.md?raw";
+import { APP_STORE_URL, RAYCAST_URL } from "../lib/links";
+import { parseChangelog } from "../../../../scripts/changelog-parse.mjs";
+
+const releases = parseChangelog(changelogText);
+
+interface Props {
+  /** TinyShelf's badge: only the home page passes it (see below). */
+  tinyshelf?: boolean;
+}
+const { tinyshelf = false } = Astro.props;
+const count = releases.length;
+const year = new Date().getFullYear();
+---
+
+<footer style="border-top: 1px solid var(--hairline); padding: 36px 0 44px">
+  <div class="wrap foot">
+    <div>
+      <div style="display: inline-flex; align-items: center; gap: 9px">
+        <img src="/assets/hostbeam-mark.svg" width="20" height="20" alt="" />
+        <span style="font-size: 14.5px; font-weight: 600; color: var(--ink)">Hostbeam</span>
+      </div>
+      <p class="note" style="margin: 6px 0 0">
+        Made by PunkABeat · <a href="/changelog/" style="color: inherit">{count} releases</a> · © {year}
+      </p>
+      <p class="note" style="margin: 10px 0 0">
+        <a href="#top" style="color: inherit">Back to top</a>
+      </p>
+      {/* TinyShelf's badge, the price of a dofollow listing there (owner,
+          2026-10-09). Their snippet, unchanged: the link must stay dofollow,
+          keep its ?ref= and point at their landing page, and they re-check it
+          weekly. The image loads from tinyshelf.co, uncached, on every view —
+          the one third-party request on the site, said so on /privacy — so it
+          is on the home page only, which is the one page their check reads. */}
+      {
+        tinyshelf && (
+          <div style="margin-top: 18px">
+            <a href="https://www.tinyshelf.co/?ref=hostbeam.app" title="Featured on TinyShelf">
+              <img src="https://www.tinyshelf.co/badge/tinyshelf-badge-dark-f4d1216a.svg"
+                   alt="Featured on TinyShelf" width="216" height="64"/>
+            </a>
+          </div>
+        )
+      }
+    </div>
+    {/* Columns rather than one row: eleven links stopped fitting beside the
+        brand, and the row wrapped underneath, hanging off the right edge. */}
+    <nav class="foot-cols" aria-label="Footer">
+      <div class="foot-col">
+        <p class="foot-h">Product</p>
+        <a href="/pricing/">Pricing</a>
+        <a href="/changelog/">Changelog</a>
+        <a href="/guides/">Guides</a>
+        <a href={APP_STORE_URL}>iPhone app</a>
+        <a href={RAYCAST_URL}>Raycast extension</a>
+      </div>
+      <div class="foot-col">
+        <p class="foot-h">Help</p>
+        <a href="/#faq">FAQ</a>
+        <a href="mailto:support@hostbeam.app">Support</a>
+      </div>
+      <div class="foot-col">
+        <p class="foot-h">Legal</p>
+        <a href="/privacy/">Privacy policy</a>
+        <a href="/terms/">Terms</a>
+        <a href="/refunds/">Refunds</a>
+        <a href="/licenses/">Open source</a>
+      </div>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px 48px;
+    flex-wrap: wrap;
+  }
+  .foot-cols {
+    display: flex;
+    gap: 28px 56px;
+    flex-wrap: wrap;
+  }
+  .foot-col {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .foot-h {
+    margin: 0 0 3px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .foot-col a {
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .foot-col a:hover {
+    color: var(--ink);
+  }
+</style>

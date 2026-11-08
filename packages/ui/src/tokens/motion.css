@@ -1,0 +1,40 @@
+/* ============================================================
+   Hostbeam — Motion tokens
+   Calm and native. Quick ease-outs, no bounce on functional
+   feedback. A single gentle spring reserved for success.
+   ============================================================ */
+
+:root {
+  /* --- Durations ------------------------------------------ */
+  --dur-instant: 80ms; /* @kind other */
+  --dur-fast: 140ms; /* @kind other */
+  --dur-base: 200ms; /* @kind other */
+  --dur-slow: 320ms; /* @kind other */
+
+  /* --- Easings -------------------------------------------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* @kind other */
+  --ease-in-out: cubic-bezier(0.45, 0, 0.2, 1); /* @kind other */
+  --ease-standard: cubic-bezier(0.2, 0, 0.2, 1); /* @kind other */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1); /* @kind other */
+
+  /* --- Semantic transitions ------------------------------- */
+  --transition-control:
+    background-color var(--dur-instant) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard),
+    transform var(--dur-instant) var(--ease-standard);
+  --transition-fade: opacity var(--dur-base) var(--ease-out);
+
+  /* Press feedback: shrink, never bounce */
+  --press-scale: 0.97; /* @kind other */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0ms;
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+    --press-scale: 1;
+  }
+}

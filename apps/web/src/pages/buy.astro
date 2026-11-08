@@ -1,0 +1,27 @@
+---
+// /buy used to open the Paddle checkout (ADR 0014). Licensing is retired
+// (ADR 0031): the route stays, because older posts, receipts and the app's
+// older builds link to it, and it now says there is nothing to buy. The
+// checkout as it was is in the repository's history.
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Buy · Hostbeam" description="Hostbeam is free. There is nothing to buy.">
+  <div class="site" style="min-height: 100vh; display: flex; align-items: center; justify-content: center">
+    <div class="wrap" style="text-align: center; max-width: 480px">
+      <img src="/assets/hostbeam-icon.svg" width="56" height="56" alt="" style="border-radius: 14px" />
+      <h1 class="h2" style="margin-top: 20px">There’s nothing to buy.</h1>
+      <p class="sub" style="margin: 12px auto 0">
+        Hostbeam is free: every feature, no limit, no reminder. Licenses are no longer sold.
+      </p>
+      <p style="margin-top: 28px">
+        <a class="btn btn-primary" href="/">Back to hostbeam.app</a>
+      </p>
+      <p style="font-size: 12.5px; color: var(--label-tertiary); margin-top: 28px">
+        Bought a license before? A key you activated keeps working, and the app has every
+        feature either way. Questions:
+        <a href="mailto:support@hostbeam.app" style="color: inherit">support@hostbeam.app</a>.
+      </p>
+    </div>
+  </div>
+</Base>

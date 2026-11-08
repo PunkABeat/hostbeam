@@ -1,0 +1,249 @@
+name: Hostbeam
+options:
+  bundleIdPrefix: app.hostbeam.ios
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  BeamEngine:
+    path: BeamEngine
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    # The compiler lists every localizable literal it sees (.stringsdata), which
+    # is how the string catalog learns about new strings and how
+    # scripts/check-ios-strings.mjs finds untranslated ones. Xcode's own project
+    # template turns this on; XcodeGen's does not, and without it forty strings
+    # shipped English-only (docs/process/ios-code-review-2026-09.md § A5).
+    SWIFT_EMIT_LOC_STRINGS: YES
+    # Real-team automatic signing (enrollment approved 2026-07-07): Xcode
+    # registers the App IDs + the group.app.hostbeam app group on first build
+    # and provisions for both simulator and device. The Team ID is public
+    # (it's embedded in every distributed binary).
+    DEVELOPMENT_TEAM: U3C6XC6LHJ
+    CODE_SIGN_STYLE: Automatic
+    # iOS versions are INDEPENDENT of the Mac app's (decided 2026-08-30). The
+    # Mac ships continuously through its own updater; the iPhone ships in
+    # batches through App Review, so the two diverge immediately and forcing
+    # them to match would mean burning App Store versions on Mac-only fixes.
+    # An App Store version can never be reused, so bump deliberately.
+    # scripts/check-version-sync.mjs validates this lane separately.
+    MARKETING_VERSION: "1.0"
+    # Build number. Must strictly increase for every App Store upload, even a
+    # re-upload of the same MARKETING_VERSION after a rejection.
+    # Uploaded builds are recorded in apps/mobile/uploads.json and
+    # scripts/check-version-sync.mjs refuses a number that is not above the
+    # last one — App Store Connect rejects a reused build number at upload,
+    # after the archive and the signing.
+    CURRENT_PROJECT_VERSION: "13"
+    # iPhone-only for v1 (ADR 0016 scope); iPads run it in compatibility mode
+    # and App Review doesn't judge bespoke iPad layouts we don't have.
+    # NOT enough on its own: XcodeGen's iOS target preset sets "1,2" on every
+    # target, which wins over this, so each shipped target repeats it. Builds 1
+    # to 11 all declared iPad, and App Store Connect refused to submit 11
+    # without 13-inch iPad screenshots (2026-09-28). An App Store app cannot
+    # drop a device family once it ships with it, so this is checked in the
+    # archive by scripts/release-ios.sh.
+    TARGETED_DEVICE_FAMILY: "1"
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+# Explicit scheme so Xcode runs attach the local StoreKit configuration —
+# purchase/restore are testable in Xcode without the ASC product. CLI builds
+# and devicectl launches ignore it (they hit the real sandbox App Store).
+schemes:
+  Hostbeam:
+    build:
+      targets:
+        Hostbeam: all
+    # The app-level unit tests (AppTests/). The engine's own tests run with
+    # `swift test` in BeamEngine/.
+    test:
+      config: Debug
+      targets:
+        - HostbeamTests
+    run:
+      config: Debug
+      storeKitConfiguration: Hostbeam.storekit
+    archive:
+      config: Release
+targets:
+  Hostbeam:
+    type: application
+    platform: iOS
+    sources:
+      - App
+      - Shared
+      # The share extension's status view, compiled into the app too so the
+      # DEBUG screenshot rig can stage its states (App/ScreenshotStage.swift).
+      - path: ShareUI/ShareStatusView.swift
+      # The Control's intent, compiled into the app too: openAppWhenRun runs
+      # the intent in the app, which must therefore know the type. Without
+      # this the control did nothing when tapped (see BeamControlIntent.swift).
+      - path: Widgets/BeamControlIntent.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.hostbeam.ios.Hostbeam
+        TARGETED_DEVICE_FAMILY: "1"   # iPhone only; see the project setting
+        CODE_SIGN_ENTITLEMENTS: App/Hostbeam.entitlements
+        # Appended to `applinks:hostbeam.app` in the entitlements. Empty for
+        # Release. In Debug it lets a phone with Settings → Developer →
+        # Associated Domains Development on fetch the site's
+        # apple-app-site-association directly, instead of from Apple's CDN,
+        # which kept serving "Not Found" for a while after the file first went
+        # live (2026-09-19) — so a changed file is testable the same minute.
+        ASSOCIATED_DOMAINS_MODE: ""
+      configs:
+        Debug:
+          ASSOCIATED_DOMAINS_MODE: "?mode=developer"
+    info:
+      path: App/Info.plist
+      properties:
+        # Through the build settings — a literal here silently wins over
+        # MARKETING_VERSION / CURRENT_PROJECT_VERSION, which is how every build
+        # up to 2026-09-04 carried 1.0 (1) whatever this file said.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDisplayName: Hostbeam
+        # Export compliance (recorded 2026-08-24): SSH via standard protocols
+        # is exempt encryption — declaring it here skips the per-build
+        # questionnaire on every upload.
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        NSPhotoLibraryUsageDescription: "Hostbeam reads the screenshot you pick so it can beam it to your host."
+        # hostbeam://beam-last — the widget's tap target (WidgetKit ignores
+        # openAppWhenRun on intents; deep link is the sanctioned way in).
+        CFBundleURLTypes:
+          - CFBundleURLName: app.hostbeam.ios
+            CFBundleURLSchemes: [hostbeam]
+        NSCameraUsageDescription: "Hostbeam uses the camera only to scan the host QR from your Mac."
+        UIAppFonts:
+          - Geist-Regular.ttf
+          - Geist-Medium.ttf
+          - Geist-SemiBold.ttf
+          - Geist-Bold.ttf
+    dependencies:
+      - package: BeamEngine
+      - target: HostbeamShare
+      - target: HostbeamAction
+      - target: HostbeamWidgets
+  # Unit tests for the app's own logic — the parts of Shared/ and App/ that
+  # are plain Swift: failure wording, the add-host rules, the host a shortcut
+  # beams to, the add flow's routing. Hosted in the app so `@testable import
+  # Hostbeam` reaches them.
+  HostbeamTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - AppTests
+    dependencies:
+      - target: Hostbeam
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.hostbeam.ios.HostbeamTests
+        GENERATE_INFOPLIST_FILE: YES
+  HostbeamShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Share
+      - ShareUI
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.hostbeam.ios.Hostbeam.HostbeamShare
+        TARGETED_DEVICE_FAMILY: "1"   # iPhone only; see the project setting
+        CODE_SIGN_ENTITLEMENTS: Share/HostbeamShare.entitlements
+    info:
+      path: Share/Info.plist
+      properties:
+        # Through the build settings — a literal here silently wins over
+        # MARKETING_VERSION / CURRENT_PROJECT_VERSION, which is how every build
+        # up to 2026-09-04 carried 1.0 (1) whatever this file said.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDisplayName: Beam to host
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              # 25, matching Beamer.maxBatch. iOS uses this to decide whether to
+              # *offer* the extension at all: at 1 it was filtered out of the
+              # share sheet the moment you selected two photos, so no amount of
+              # multi-file handling in ShareViewController could ever run.
+              # Raising it is what actually makes next.md § 6 work on a phone.
+              NSExtensionActivationSupportsImageWithMaxCount: 25
+              # Any file the user hands over (ADR 0006's 2026-09-26 amendment):
+              # a PDF from Files, a screen recording from Photos.
+              NSExtensionActivationSupportsFileWithMaxCount: 25
+              NSExtensionActivationSupportsMovieWithMaxCount: 25
+    dependencies:
+      - package: BeamEngine
+  HostbeamWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.hostbeam.ios.Hostbeam.HostbeamWidgets
+        TARGETED_DEVICE_FAMILY: "1"   # iPhone only; see the project setting
+        CODE_SIGN_ENTITLEMENTS: Widgets/HostbeamWidgets.entitlements
+    info:
+      path: Widgets/Info.plist
+      properties:
+        # Through the build settings — a literal here silently wins over
+        # MARKETING_VERSION / CURRENT_PROJECT_VERSION, which is how every build
+        # up to 2026-09-04 carried 1.0 (1) whatever this file said.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDisplayName: Hostbeam
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NSPhotoLibraryUsageDescription: "Hostbeam reads your latest screenshot so it can beam it to your host."
+    dependencies:
+      - package: BeamEngine
+  HostbeamAction:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ActionExt
+      - ShareUI
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.hostbeam.ios.Hostbeam.HostbeamAction
+        TARGETED_DEVICE_FAMILY: "1"   # iPhone only; see the project setting
+        CODE_SIGN_ENTITLEMENTS: ActionExt/HostbeamAction.entitlements
+    info:
+      path: ActionExt/Info.plist
+      properties:
+        # Through the build settings — a literal here silently wins over
+        # MARKETING_VERSION / CURRENT_PROJECT_VERSION, which is how every build
+        # up to 2026-09-04 carried 1.0 (1) whatever this file said.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDisplayName: Beam to host
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ui-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              # 25, matching Beamer.maxBatch. iOS uses this to decide whether to
+              # *offer* the extension at all: at 1 it was filtered out of the
+              # share sheet the moment you selected two photos, so no amount of
+              # multi-file handling in ShareViewController could ever run.
+              # Raising it is what actually makes next.md § 6 work on a phone.
+              NSExtensionActivationSupportsImageWithMaxCount: 25
+              # Any file the user hands over (ADR 0006's 2026-09-26 amendment):
+              # a PDF from Files, a screen recording from Photos.
+              NSExtensionActivationSupportsFileWithMaxCount: 25
+              NSExtensionActivationSupportsMovieWithMaxCount: 25
+    dependencies:
+      - package: BeamEngine

@@ -1,0 +1,9 @@
+Host devbox
+  HostName 192.0.2.10
+  User developer
+
+Host staging prod
+  HostName example.internal
+
+Host *
+  ForwardAgent yes

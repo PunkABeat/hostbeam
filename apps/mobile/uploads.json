@@ -1,0 +1,89 @@
+{
+  "note": "Every build ever uploaded to App Store Connect, appended by scripts/release-ios.sh. The version check refuses a CURRENT_PROJECT_VERSION that is not above the highest build here.",
+  "uploads": [
+    {
+      "version": "1.0",
+      "build": 1,
+      "date": "2026-08-24",
+      "to": "TestFlight",
+      "how": "Xcode Organizer, by hand"
+    },
+    {
+      "version": "1.0",
+      "build": 2,
+      "date": "2026-09-04",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 3,
+      "date": "2026-09-05",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 4,
+      "date": "2026-09-18",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 5,
+      "date": "2026-09-19",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 6,
+      "date": "2026-09-20",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 7,
+      "date": "2026-09-26",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 8,
+      "date": "2026-09-27",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 9,
+      "date": "2026-09-27",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 10,
+      "date": "2026-09-28",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 11,
+      "date": "2026-09-28",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    },
+    {
+      "version": "1.0",
+      "build": 12,
+      "date": "2026-09-28",
+      "to": "App Store Connect",
+      "how": "scripts/release-ios.sh"
+    }
+  ]
+}

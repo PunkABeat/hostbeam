@@ -1,0 +1,40 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--window);
+  font-family: var(--font-system);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Neutral "not checked yet" host dot (we don't probe reachability up front). */
+.hb-dot--unknown {
+  background: var(--label-quaternary);
+}
+
+/* Recent thumbnail → tap to enlarge: reveal the zoom scrim on hover/focus. */
+.pf-thumb .pf-thumb-zoom {
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-standard);
+}
+.pf-thumb:hover .pf-thumb-zoom,
+.pf-thumb:focus-visible .pf-thumb-zoom {
+  opacity: 1;
+}
+
+/* Keyboard focus rings (only for keyboard nav, not mouse). */
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}

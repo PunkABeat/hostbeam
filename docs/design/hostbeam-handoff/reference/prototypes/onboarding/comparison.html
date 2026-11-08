@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hostbeam — First-run onboarding · 3 directions</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: var(--font-system); color: var(--label);
+    background: #e6e6ea;
+    -webkit-font-smoothing: antialiased;
+  }
+  .ob-page { min-height: 100vh; padding: 30px 40px 60px; }
+  .ob-h { max-width: 1320px; margin: 0 auto 26px; }
+  .ob-h h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin: 0; line-height: 1.3; }
+  .ob-h h1 img { vertical-align: -4px; margin-right: 9px; }
+  .ob-h p { font-size: 13px; color: var(--label-secondary); margin: 6px 0 0; max-width: 640px; line-height: 1.5; }
+  .ob-row { display: flex; gap: 40px; align-items: flex-start; justify-content: flex-start; padding-bottom: 20px; }
+  .ob-col { display: flex; flex-direction: column; gap: 14px; flex: none; }
+  .ob-cap .k { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: .02em; }
+  .ob-cap .t { font-size: 14px; font-weight: 600; color: var(--label); margin-top: 1px; }
+  .ob-cap .d { font-size: 11.5px; color: var(--label-tertiary); margin-top: 2px; max-width: 300px; line-height: 1.4; }
+  .ob-stage { display: flex; justify-content: center; padding: 10px 0; }
+  .ob-restart { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; border: 1px solid var(--separator); background: var(--surface-content);
+    color: var(--label-secondary); font-family: var(--font-system); font-size: 12px; font-weight: 500; padding: 5px 11px; border-radius: var(--radius-md); cursor: pointer;
+    transition: background var(--dur-instant) var(--ease-standard); }
+  .ob-restart:hover { background: var(--fill-hover); color: var(--label); }
+
+  /* shared flow animations */
+  .ob-shimmer { background: linear-gradient(90deg, var(--fill-secondary), var(--fill-tertiary), var(--fill-secondary)); background-size: 220% 100%; animation: ob-sweep 1.2s linear infinite; }
+  @keyframes ob-sweep { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  .ob-reveal { animation: ob-up var(--dur-base) var(--ease-out); }
+  @keyframes ob-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .ob-pop { animation: ob-pop var(--dur-slow) var(--ease-spring); }
+  @keyframes ob-pop { 0% { transform: scale(0.4); opacity: 0; } 60% { opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .ob-shimmer, .ob-reveal, .ob-pop { animation: none; } }
+
+  /* Flow A — airy host rows */
+  .obA-host { transition: background var(--dur-instant) var(--ease-standard), transform var(--dur-instant) var(--ease-standard); }
+  .obA-host:hover { background: var(--fill-hover) !important; }
+  .obA-host:active { transform: scale(0.99); background: var(--fill-active) !important; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="shared.jsx" type="text/babel"></script>
+  <script src="flowA.jsx" type="text/babel"></script>
+  <script src="flowB.jsx" type="text/babel"></script>
+  <script src="flowC.jsx" type="text/babel"></script>
+  <script type="text/babel" data-presets="react">
+    (function () {
+      function ExitCard() {
+        return (
+          <div style={{ width: 320, background: "var(--surface-popover)", borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-popover)", padding: "22px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 10 }}>
+            <span style={{ width: 44, height: 44, borderRadius: "var(--radius-md)", background: "var(--window)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--label)" }}>
+              <img src="../../assets/hostbeam-menubar.svg" width="24" height="24" alt="" />
+            </span>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>Hostbeam lives in your menu bar</div>
+            <div style={{ fontSize: 12, color: "var(--label-secondary)" }}>Onboarding closed. Press the hotkey any time to beam.</div>
+          </div>
+        );
+      }
+
+      function FlowHost({ Flow }) {
+        const [run, setRun] = React.useState(0);
+        const [closed, setClosed] = React.useState(false);
+        return (
+          <>
+            <div className="ob-stage">
+              {closed ? <ExitCard /> : <Flow key={run} onDone={() => setClosed(true)} />}
+            </div>
+            <button className="ob-restart" onClick={() => { setClosed(false); setRun((r) => r + 1); }}>
+              <window.Ic name="rotate-cw" size={13} /> Restart flow
+            </button>
+          </>
+        );
+      }
+
+      const COLS = [
+        { k: "A", t: "Popover-native", d: "Micro-onboarding right inside the 340px menu-bar popover. Never opens a window — stays invisible.", Flow: window.FlowA },
+        { k: "B", t: "Welcome window", d: "A proper guided first-run window with a step rail and a live connection test before you finish.", Flow: window.FlowB },
+        { k: "C", t: "Single-card", d: "Zero-friction: auto-detects SSH hosts, pick one, optional test, finish — all on one screen.", Flow: window.FlowC },
+      ];
+
+      function App() {
+        return (
+          <div className="ob-page">
+            <div className="ob-h">
+              <h1><img src="../../assets/hostbeam-mark.svg" width="22" height="22" alt="" />Onboarding — archived comparison</h1>
+              <p><b style={{color:'var(--label)'}}>Direction A (Popover-native) was chosen</b> and lives in the main prototype. This page keeps all three directions for reference. <a href="index.html" style={{color:'var(--accent)',fontWeight:600,textDecoration:'none'}}>Open the locked-in flow →</a></p>
+            </div>
+            <div className="ob-row">
+              {COLS.map((c) => (
+                <div className="ob-col" key={c.k}>
+                  <div className="ob-cap"><span className="k">{c.k}</span><div className="t">{c.t}</div><div className="d">{c.d}</div></div>
+                  <FlowHost Flow={c.Flow} />
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+    })();
+  </script>
+</body>
+</html>

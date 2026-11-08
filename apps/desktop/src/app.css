@@ -1,0 +1,60 @@
+/* The design components assume a border-box reset (the prototype HTML had one);
+   without it, width:100% + padding rows overflow. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  font-family: var(--font-system);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Room for the popover beak (top) and the card's drop shadow; the window is
+   sized to this wrapper (window.fitPopover), so this padding is the only place
+   the shadow has to fade out in — macOS clips whatever reaches past the window
+   edge, which reads as a hard-edged grey box around the popover, plain to see
+   over a light window behind it. That is why the card uses
+   --shadow-popover-panel, a tighter blur than the shared --shadow-popover:
+   ~10px to each side and ~18px below, comfortably inside these numbers. The
+   sides must match WRAP_PAD_X in lib.rs, which the window width and the beak's
+   position are derived from. */
+.hb-wrap {
+  padding: 12px 24px 32px;
+}
+
+/* Neutral "not checked yet" host dot (we don't probe reachability up front). */
+.hb-dot--unknown {
+  background: var(--label-quaternary);
+}
+
+/* Onboarding "Almost done": the host header is a button that re-opens the picker. */
+.ob-changehost:hover {
+  background: var(--fill-hover) !important;
+}
+
+/* Step-in transition for the popover / onboarding frames (className="hb-step").
+   Moved out of the retired shared.jsx style injection (UI detach E6). */
+.hb-step {
+  animation: hb-step-in 260ms var(--ease-out);
+}
+@keyframes hb-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hb-step {
+    animation: none;
+  }
+}

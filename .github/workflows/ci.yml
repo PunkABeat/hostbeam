@@ -1,0 +1,41 @@
+# The checks that run on every push, docs-only ones included: all of them run
+# on Linux, which counts one against the account's free Actions minutes where
+# macOS counts ten. The macOS gates, desktop.yml and iphone.yml, run by hand
+# (docs/process/ci.md). Actions are pinned to commits (Tauri's lifecycle
+# guidance); update the SHA, not the tag.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs:
+    # Plain Node with no dependencies, so no `npm ci`.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Docs are current, and the script tests
+        run: |
+          npm run check:docs
+          npm run test:scripts
+
+  dependencies:
+    # cargo-deny is a container action, which GitHub runs on Linux only. It
+    # reads the lock file and builds nothing, so the macOS-only crates in it
+    # are no obstacle.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Advisories and sources
+        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2
+        with:
+          manifest-path: apps/desktop/src-tauri/Cargo.toml
+          command: check advisories sources

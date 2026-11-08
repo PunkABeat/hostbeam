@@ -1,0 +1,171 @@
+---
+// Post-checkout page (ADR 0014): polls the licensing worker for the key minted
+// by the Paddle webhook (it can land a beat after the redirect) and shows it
+// with a copy button; falls back to "check your email" if it isn't ready.
+import Base from "../layouts/Base.astro";
+import { LICENSE_API } from "../lib/checkout";
+import { DMG_URL } from "../lib/links";
+---
+
+<Base
+  title="Thanks · Hostbeam"
+  description="Your Hostbeam license key and how to activate it."
+  noindex
+>
+  <div class="site" style="min-height: 100vh; display: flex; align-items: center; justify-content: center">
+    <div class="wrap" style="text-align: center; max-width: 560px; padding: 48px 32px">
+      <img src="/assets/hostbeam-icon.svg" width="56" height="56" alt="" style="border-radius: 14px" />
+      <h1 class="h2" style="margin-top: 20px">Thanks for buying Hostbeam.</h1>
+
+      <div id="waiting">
+        <p class="sub" style="margin: 12px auto 0">Fetching your license key…</p>
+      </div>
+
+      <div id="ready" style="display: none">
+        <p class="sub" style="margin: 12px auto 0">Here’s your license key. It’s also in your email.</p>
+        <div
+          style="display: flex; align-items: center; gap: 10px; justify-content: center; margin-top: 24px; padding: 14px 16px; border-radius: var(--radius-lg); background: var(--page-card); box-shadow: inset 0 0 0 0.5px var(--separator)"
+        >
+          <code id="key" class="mono" style="font-size: 15px; color: var(--label); word-break: break-all"></code>
+          <button id="copy" class="btn btn-sm btn-primary" style="flex: none">Copy</button>
+        </div>
+        <p style="font-size: 13.5px; color: var(--label-secondary); margin-top: 22px; line-height: 1.55">
+          Open Hostbeam → <strong>Preferences → License</strong>, paste the key, and hit
+          <strong>Activate</strong>. One license covers up to 3 Macs.
+        </p>
+      </div>
+
+      <div id="emailed" style="display: none">
+        <p class="sub" style="margin: 12px auto 0">
+          Your key is on its way. It’ll be in your email within a few minutes.
+        </p>
+        <p style="font-size: 13.5px; color: var(--label-tertiary); margin-top: 16px">
+          Nothing after 15 minutes? Email
+          <a href="mailto:support@hostbeam.app" style="color: var(--accent)">support@hostbeam.app</a>.
+        </p>
+      </div>
+
+      {/* Outside the three states on purpose: whichever one a buyer lands in,
+          this page has no nav and no footer, and the back button only returns
+          them to a checkout they have already completed. The download belongs
+          here because buying does not require having installed the app yet, and
+          the refund policy belongs here because just-after-paying is exactly
+          when someone looks for it. */}
+      <p
+        style="font-size: 13px; color: var(--label-tertiary); margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--separator); display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center"
+      >
+        <a class="nav-link" href={DMG_URL} style="padding: 0">Download for macOS</a>
+        <span aria-hidden="true">·</span>
+        <a class="nav-link" href="/" style="padding: 0">Back to Hostbeam</a>
+        <span aria-hidden="true">·</span>
+        <a class="nav-link" href="/refunds/" style="padding: 0">Refunds</a>
+        <span aria-hidden="true">·</span>
+        <a class="nav-link" href="mailto:support@hostbeam.app" style="padding: 0">Support</a>
+      </p>
+    </div>
+  </div>
+
+  <script is:inline>
+    // A single confetti burst for the moment the key appears — the one genuinely
+    // good beat in a flow that otherwise reads as a spinner. Deliberately not a
+    // library: the site promises no third-party scripts, and pulling a CDN
+    // dependency onto the page that displays a licence key is a poor trade for a
+    // decoration. ~40 lines of canvas costs nothing and ships nothing.
+    function hostbeamConfetti() {
+      // Honour reduced motion: for some people this is nausea, not delight.
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      const canvas = document.createElement("canvas");
+      canvas.setAttribute("aria-hidden", "true");
+      canvas.style.cssText =
+        "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999";
+      document.body.appendChild(canvas);
+
+      const ctx = canvas.getContext("2d");
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = innerWidth * dpr;
+      canvas.height = innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+
+      // Brand blues, with one warm accent so it reads as celebration not UI.
+      const colors = ["#2d6cf6", "#5183f7", "#7aa2f8", "#a9c4fb", "#32d74b", "#ffc857"];
+      const pieces = Array.from({ length: 90 }, () => ({
+        x: innerWidth / 2 + (Math.random() - 0.5) * 120,
+        y: innerHeight * 0.38,
+        vx: (Math.random() - 0.5) * 9,
+        vy: Math.random() * -11 - 4,
+        w: 5 + Math.random() * 5,
+        h: 8 + Math.random() * 6,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.3,
+        color: colors[(Math.random() * colors.length) | 0],
+      }));
+
+      const started = performance.now();
+      (function frame(now) {
+        const elapsed = now - started;
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        // Fade the whole burst out rather than letting pieces litter the floor.
+        ctx.globalAlpha = Math.max(0, 1 - Math.max(0, elapsed - 1600) / 900);
+
+        for (const p of pieces) {
+          p.vy += 0.32;            // gravity
+          p.vx *= 0.995;           // slight drag, so it drifts rather than flies
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        }
+
+        if (elapsed < 2500) requestAnimationFrame(frame);
+        else canvas.remove();
+      })(started);
+    }
+  </script>
+
+  <script is:inline define:vars={{ licenseApi: LICENSE_API }}>
+    (async () => {
+      const txn = new URLSearchParams(location.search).get("transaction_id");
+      const show = (id) => {
+        for (const s of ["waiting", "ready", "emailed"])
+          document.getElementById(s).style.display = s === id ? "" : "none";
+        // Only when the key is actually on screen. The "emailed" fallback means
+        // something went slightly wrong; confetti there would read as sarcasm.
+        if (id === "ready") hostbeamConfetti();
+      };
+      if (!txn) return show("emailed");
+
+      // The webhook usually lands within a second or two of the redirect;
+      // poll briefly before falling back to the email path.
+      for (let attempt = 0; attempt < 15; attempt++) {
+        try {
+          const res = await fetch(`${licenseApi}/key?transaction_id=${encodeURIComponent(txn)}`);
+          if (res.ok) {
+            const { key } = await res.json();
+            document.getElementById("key").textContent = key;
+            const btn = document.getElementById("copy");
+            btn.addEventListener("click", async () => {
+              try {
+                await navigator.clipboard.writeText(key);
+                btn.textContent = "Copied";
+                setTimeout(() => (btn.textContent = "Copy"), 1500);
+              } catch {
+                /* selection fallback: the key is visible and selectable */
+              }
+            });
+            return show("ready");
+          }
+        } catch {
+          /* transient network error — keep polling */
+        }
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+      show("emailed");
+    })();
+  </script>
+</Base>

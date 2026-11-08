@@ -1,0 +1,38 @@
+{
+  "name": "hostbeam",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "!apps/raycast",
+    "!apps/video"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @hostbeam/desktop",
+    "build": "npm run build -w @hostbeam/desktop",
+    "typecheck": "npm run typecheck -w @hostbeam/desktop",
+    "lint": "npm run lint -w @hostbeam/desktop",
+    "test": "npm run test -w @hostbeam/desktop",
+    "format": "npm run format -w @hostbeam/desktop",
+    "format:check": "npm run format:check -w @hostbeam/desktop",
+    "tauri": "npm run tauri -w @hostbeam/desktop --",
+    "clean:rust": "cargo clean --manifest-path apps/desktop/src-tauri/Cargo.toml",
+    "dev:web": "npm run dev -w @hostbeam/web",
+    "build:web": "npm run build -w @hostbeam/web",
+    "typecheck:web": "npm run typecheck -w @hostbeam/web",
+    "deploy:web": "npm run deploy -w @hostbeam/web",
+    "testhost": "scripts/testhost.sh status",
+    "testhost:up": "scripts/testhost.sh up",
+    "testhost:down": "scripts/testhost.sh down",
+    "testhost:logs": "scripts/testhost.sh logs",
+    "test:update-install": "scripts/test-update-install.sh",
+    "release:cut": "node scripts/cut-release.mjs",
+    "test:scripts": "node --test scripts/*.test.mjs",
+    "check:docs": "node scripts/check-progress-current.mjs && node scripts/check-handoff-short.mjs && node scripts/check-docs-drift.mjs",
+    "test:agent": "npm run test -w @hostbeam/agent",
+    "downloads": "node scripts/downloads.mjs",
+    "stats": "node scripts/stats.mjs",
+    "notices": "node scripts/third-party-notices.mjs",
+    "check:notices": "node scripts/third-party-notices.mjs --check"
+  }
+}

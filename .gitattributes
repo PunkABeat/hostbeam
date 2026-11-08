@@ -1,0 +1,2 @@
+docs/marketing/screenshots/**/*.png filter=lfs diff=lfs merge=lfs -text
+docs/marketing/video/*.mp4 filter=lfs diff=lfs merge=lfs -text

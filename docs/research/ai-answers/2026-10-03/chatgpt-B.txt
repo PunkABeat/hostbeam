@@ -1,0 +1,27 @@
+Site: ChatGPT (https://chatgpt.com, logged out, default settings; no model name shown in the UI)
+Question B: What's the best way to send a screenshot from my Mac to a coding agent running on a remote server?
+Timestamp: 2026-10-03T02:40:48Z
+Web sources cited: none (no links in the answer)
+
+--- Answer (verbatim innerText) ---
+
+If the coding agent can access files on the remote server, the simplest reliable workflow is:
+
+Take the screenshot on your Mac — ⌘⇧4 or ⌘⇧5.
+
+Save it to a known file, e.g. ~/Desktop/screenshot.png.
+
+Copy it to the server with scp:
+
+scp ~/Desktop/screenshot.png user@server:/tmp/screenshot.png
+
+
+Tell the coding agent to inspect /tmp/screenshot.png.
+
+If you're already using SSH, an even nicer option is dragging the screenshot into an SFTP client or using rsync for repeated transfers.
+
+For a coding agent, I'd generally recommend PNG → scp → a predictable path on the server. It avoids clipboard/GUI integration and gives the agent a real file it can inspect with its image tools.
+
+If you tell me which coding agent you're using (Claude Code, Codex, Cursor agent, a custom agent, etc.) and how you're connecting to the server (SSH, VS Code Remote, Docker, etc.), I can give you the most convenient setup—including a one-command Mac shortcut.
+
+Log in for personalized, step-by-step guidance.

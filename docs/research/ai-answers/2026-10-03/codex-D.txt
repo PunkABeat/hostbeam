@@ -1,0 +1,12 @@
+codex-cli 0.159.3 · gpt-6.1-sol (high) · web search on · 2026-10-03T02:47:57Z · question D
+Q: Is there a Mac app that sends screenshots to Claude Code over SSH?
+---
+Yes—**[Paste2SSH](https://paste2ssh.com/)** is built specifically for this. It’s a free Mac menu bar app for macOS 14+ that:
+
+- Watches your clipboard for screenshots.
+- Uploads them to your remote server using your existing SSH config and keys.
+- Copies the remote file path so you can press **⌘V in Claude Code**.
+
+Take a screenshot to the clipboard with **⌘⌃⇧4**, wait for the upload, then paste into your remote Claude Code session. The app transfers files directly to your server without a cloud intermediary, according to its developer. [Details and download](https://paste2ssh.com/).
+
+If you prefer open source, **[screencp](https://github.com/puma314/screencp)** offers a similar workflow: select a screenshot and SSH host from its menu bar interface, click Send, then paste the remote path.

@@ -1,0 +1,79 @@
+# Cloudflare Worker config for the licensing glue (ADR 0014).
+#
+# Two deployments from one source, so the sandbox purchase loop stays testable
+# after go-live (see docs/process/milestones/006-licensing-and-free-tier.md,
+# "Sandbox alongside live"):
+#
+#   production  npx wrangler deploy                 → license.hostbeam.app
+#   sandbox     npx wrangler deploy --env sandbox   → *.workers.dev
+#
+# Secrets are per-environment and never in this file. Set them with:
+#   npx wrangler secret put <NAME>                  (production)
+#   npx wrangler secret put <NAME> --env sandbox    (sandbox)
+#
+#   PADDLE_WEBHOOK_SECRET  — Paddle notification destination secret key
+#   PADDLE_API_KEY         — Paddle API key (customer.read is all it needs)
+#   KEYGEN_TOKEN           — Keygen product token (create/suspend licenses)
+#   RESEND_API_KEY         — Resend (free tier) sends the license-key email
+#   APPSTORE_ISSUER_ID     — ASC → Users and Access → Integrations → In-App Purchase
+#   APPSTORE_KEY_ID        — id of that In-App Purchase key
+#   APPSTORE_PRIVATE_KEY   — the key's .p8 file content (PEM, multiline)
+#
+# The App Store side is environment-agnostic: src/appstore.ts tries Apple's
+# production API then falls back to the sandbox one, so TestFlight builds work
+# against either deployment without configuration. It is unused since ADR 0028
+# (the iPhone app is free and sells nothing) and stays deployed for later.
+name = "hostbeam-license-webhook"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+
+# If the account ever moves to Workers Paid, uncomment to switch the key email
+# to Cloudflare Email Service (the code auto-prefers the binding over Resend;
+# hostbeam.app must be onboarded to Email Sending first):
+# [[send_email]]
+# name = "EMAIL"
+
+# Daily reconciliation (src/reconcile.ts): checks that every completed Paddle
+# transaction actually has a Keygen licence, and alerts if not. Deliberately
+# production-only — the sandbox turns it off under [env.sandbox], so it stays
+# quiet instead of alerting about refunded test purchases.
+# 09:00 UTC = a morning check before the day's support mail arrives.
+[triggers]
+crons = ["0 9 * * *"]
+
+# --- production (live Paddle) -------------------------------------------------
+[vars]
+PADDLE_API_URL = "https://api.paddle.com"
+# Operator alerts go to support@, which Cloudflare Email Routing forwards to the
+# owner — so no personal address is committed to the repo.
+ALERT_TO = "support@hostbeam.app"
+# Paddle's published webhook egress addresses. Live and sandbox differ, so this
+# is per-environment; src/paddle.ts fetches and caches it rather than pinning.
+PADDLE_IPS_URL = "https://api.paddle.com/ips"
+# Keygen (same account id as apps/desktop/src-tauri/src/licensing/keygen.rs).
+KEYGEN_ACCOUNT_ID = "4889da55-f7f4-45dd-9d74-a2c0fec98cd3"
+# "Hostbeam License": 1y, MAINTAIN_ACCESS, 3 machines, LICENSE auth, NO_OVERAGE.
+KEYGEN_POLICY_ID = "28f0ecd7-d6ab-458f-badf-1e2c7f0640ef"
+EMAIL_FROM = "Hostbeam <license@hostbeam.app>"
+
+# --- sandbox (Paddle sandbox, test cards) -------------------------------------
+# Named environments do NOT inherit [vars], so every key is repeated here.
+[env.sandbox]
+name = "hostbeam-license-webhook-sandbox"
+# The daily reconciliation is production-only (see [triggers] above). Wrangler
+# DOES carry [triggers] into a named environment — every sandbox deploy up to
+# 2026-09-25 printed "schedule: 0 9 * * *" — so the sandbox opts out
+# explicitly rather than by omission.
+triggers = { crons = [] }
+
+[env.sandbox.vars]
+PADDLE_API_URL = "https://sandbox-api.paddle.com"
+PADDLE_IPS_URL = "https://sandbox-api.paddle.com/ips"
+KEYGEN_ACCOUNT_ID = "4889da55-f7f4-45dd-9d74-a2c0fec98cd3"
+# A SEPARATE Keygen policy ("Hostbeam License (sandbox)", created 2026-08-29),
+# so test purchases don't consume the Dev-tier active license allowance under
+# the real policy and can be bulk-deleted by filtering on it. Settings mirror
+# production: 1y, MAINTAIN_ACCESS, floating, 3 machines, LICENSE auth,
+# NO_OVERAGE.
+KEYGEN_POLICY_ID = "bbbfe7a2-575a-4049-91d8-bb670453e5cd"
+EMAIL_FROM = "Hostbeam <license@hostbeam.app>"

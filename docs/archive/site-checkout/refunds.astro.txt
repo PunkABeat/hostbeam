@@ -1,0 +1,96 @@
+---
+// Refund and cancellation policy (ADR 0014). Paddle's domain review expects
+// Terms, Privacy, and a Refund Policy each reachable from site navigation — a
+// section inside /terms isn't clearly enough its own policy, so this page is
+// the canonical one and /terms links here.
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.tsx";
+import Footer from "../components/Footer.astro";
+---
+
+<Base
+  title="Refunds · Hostbeam"
+  description="How refunds work for a Hostbeam license: 14 days, no argument, handled by Paddle as merchant of record."
+>
+  <div class="site" id="top">
+    <Nav />
+    <main class="wrap" style="max-width: 720px; padding-top: 64px; padding-bottom: 96px">
+      <p class="note">Refund and cancellation policy · last updated 27 September 2026</p>
+      <h1 class="h2" style="font-size: clamp(32px, 4.5vw, 48px)">
+        Changed your mind? Say so and you get your money back.
+      </h1>
+      <p class="lede" style="margin-top: 20px">
+        Hostbeam is free to use, every feature included, precisely so you can find out whether it
+        suits you before paying anything. If you paid and it still isn't right, we'd rather refund
+        you than keep $29.
+      </p>
+      <p style="margin: 18px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+        Hostbeam is made and operated by <strong>PunkABeat</strong>, a sole proprietorship.
+      </p>
+
+      <section style="margin-top: 48px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">Refunds</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          You can request a full refund within <strong>14 days</strong> of buying a Hostbeam
+          license, for any reason. You don't have to justify it. Email
+          <a href="mailto:support@hostbeam.app" style="color: var(--beam)">support@hostbeam.app</a>
+          from the address you bought with, or contact
+          <a href="https://paddle.net" style="color: var(--beam)">Paddle</a> directly.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          Refunds go back to your original payment method. Paddle processes them; how long the
+          money takes to land is down to your bank, typically a few working days. A refund
+          deactivates the license; the app keeps working, and the reminder comes back at its next
+          check.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          After 14 days, write to us anyway. If Hostbeam is broken for you, or it clearly never
+          did what we said it does, we'll sort it out. Nothing here limits rights your local
+          consumer law gives you and doesn't let us take away.
+        </p>
+      </section>
+
+      <section style="margin-top: 40px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">Cancellation</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          A Hostbeam license is a <strong>one-time purchase, not a subscription</strong>. There is
+          nothing recurring to cancel, no renewal date, and nothing that will quietly charge you
+          again. Every Hostbeam 1 update is included; a future major version would be an optional
+          upgrade, bought only if you choose to.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          To stop using Hostbeam, deactivate your Macs in the app or simply delete it. Your
+          screenshots, files and SSH configuration are yours and live on your own machines, so there is
+          no account to close and no data of yours for us to delete.
+        </p>
+      </section>
+
+      <section style="margin-top: 40px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">Who sold you the license</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          Purchases on this site are sold by
+          <a href="https://paddle.com" style="color: var(--beam)">Paddle</a>, our merchant of
+          record, under
+          <a href="https://www.paddle.com/legal/checkout-buyer-terms" style="color: var(--beam)">Paddle's buyer terms</a>.
+          Paddle handles payment, tax, and refunds on our behalf, which is why their name appears
+          on your card statement.
+        </p>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          The iPhone app is free and has nothing to buy inside it, so there is nothing to refund
+          there.
+        </p>
+      </section>
+
+      <section style="margin-top: 40px">
+        <h2 style="font-size: 20px; font-weight: 600; color: var(--ink); margin: 0">Contact</h2>
+        <p style="margin: 14px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.7">
+          <a href="mailto:support@hostbeam.app" style="color: var(--beam)">support@hostbeam.app</a>
+          — a real person reads it. See also the
+          <a href="/terms/" style="color: var(--beam)">terms</a> and the
+          <a href="/privacy/" style="color: var(--beam)">privacy policy</a>.
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>

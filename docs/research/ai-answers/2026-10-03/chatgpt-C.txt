@@ -1,0 +1,51 @@
+Site: ChatGPT (https://chatgpt.com, logged out, default settings; no model name shown in the UI)
+Question C: How do I send a screenshot from my iPhone to Claude Code running on my server?
+Timestamp: 2026-10-03T02:41Z (asked) / 02:44Z (read)
+Web sources cited: none (no links in the answer)
+
+--- Answer (verbatim innerText) ---
+
+The simplest approach depends on how your iPhone can reach the server. If Claude Code is running in a terminal over SSH, you have a few good options:
+
+Easiest: iPhone → server via SSH/SFTP
+
+Take the screenshot on your iPhone.
+
+Use an SSH/SFTP app such as Termius, Blink, or another SSH client that supports file upload.
+
+Upload the screenshot to your server, e.g.:
+
+~/screenshots/screen.png
+
+
+In your Claude Code session, tell it where the image is:
+
+Look at ~/screenshots/screen.png and tell me what's wrong.
+
+
+Claude Code can then inspect the image if your particular Claude Code setup supports image input from local files.
+
+If you want a very convenient workflow
+
+You can make an iPhone Shortcut that:
+
+Screenshot → upload to server → tell Claude Code the filename
+
+For example, the Shortcut could POST the image to a tiny HTTP endpoint on your server:
+
+iPhone Screenshot
+       ↓
+HTTP POST
+       ↓
+your-server.com/upload
+       ↓
+~/screenshots/latest.png
+       ↓
+Claude Code
+
+
+This is particularly nice if you're frequently asking Claude Code about things you're seeing on your phone.
+
+If Claude Code is running inside a remote development environment
+
+If your server is accessed through something like SSH, VS Code Remote SSH, a cloud VM, or a container, the exact best method changes slightly. Tell me how you're connecting to Claude Code (e.g. ssh user@server, Tailscale, VS Code Remote SSH, Docker, etc.), and I can give you a concrete iPhone → server setup with the commands/Shortcut.

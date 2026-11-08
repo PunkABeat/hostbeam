@@ -1,0 +1,31 @@
+{
+  "name": "@hostbeam/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "check:layout": "node scripts/assert-no-overflow.mjs",
+    "deploy": "node ../../scripts/third-party-notices.mjs --check && astro check && astro build && node scripts/assert-live-build.mjs && node scripts/assert-no-overflow.mjs && wrangler deploy"
+  },
+  "dependencies": {
+    "@astrojs/react": "^7",
+    "@hostbeam/ui": "*",
+    "astro": "^7",
+    "qrcode-generator": "^2.0.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9",
+    "@types/node": "^26.4.0",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "playwright-core": "^1.63.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.127.1"
+  }
+}

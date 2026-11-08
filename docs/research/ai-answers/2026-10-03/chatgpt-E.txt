@@ -1,0 +1,62 @@
+Site: ChatGPT (https://chatgpt.com, logged out, default settings; no model name shown in the UI)
+Question E: How do I open a dev server running on a remote server in my Mac's browser when ssh -L says "administratively prohibited"?
+Timestamp: 2026-10-03T02:45:33Z
+Web sources cited: none (no links, no Sources panel)
+
+--- Answer (verbatim innerText) ---
+
+If ssh -L returns "administratively prohibited", the SSH server is refusing TCP forwarding. You have a few options.
+
+1. Try SSH's SOCKS proxy
+
+If you control the remote server, this is usually the easiest workaround when local forwarding is disabled:
+
+ssh -D 8080 user@remote-server
+
+
+Then configure your Mac browser to use a SOCKS5 proxy at:
+
+127.0.0.1:8080
+
+
+Now, if the dev server is running on the remote machine at:
+
+http://127.0.0.1:3000
+
+
+visit that address in the browser. The browser's traffic goes through the SSH connection.
+
+Caveat: Safari's proxy configuration can be awkward. Chrome/Firefox can be configured with a SOCKS proxy more directly.
+
+2. If you administer the SSH server, enable forwarding
+
+On the remote server, inspect /etc/ssh/sshd_config:
+
+AllowTcpForwarding yes
+
+
+Also check for a restrictive Match block that overrides it, such as:
+
+Match User myuser
+    AllowTcpForwarding no
+
+
+After changing the configuration:
+
+sudo systemctl restart sshd
+
+
+Then your original command should work:
+
+ssh -L 3000:127.0.0.1:3000 user@remote-server
+
+
+and open:
+
+http://localhost:3000
+
+3. If you don't control the SSH server
+
+"Administratively prohibited" generally means the server/operator has deliberately disabled the forwarding mechanism you're trying to use. In that case, don't try to bypass that restriction; ask the administrator to enable TCP forwarding or provide an approved tunnel/proxy.
+
+If you tell me what SSH command you're using and where the dev server is listening (e.g. 127.0.0.1:3000 on the remote server), I can give you the exact Mac command and browser setup.

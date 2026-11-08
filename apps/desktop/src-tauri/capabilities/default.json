@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the popover and preferences windows",
+  "windows": ["popover", "preferences"],
+  "permissions": [
+    "core:default",
+    "core:menu:default",
+    "core:window:allow-start-dragging"
+  ]
+}

@@ -1,0 +1,35 @@
+Claude Code 2.1.288 (Claude Code) · 2026-10-03T02:45:34Z · question A
+Q: How do I paste a screenshot into Claude Code when it's running on a remote server over SSH?
+---
+Pasting a screenshot over SSH doesn't work directly. When you press Ctrl+V, Claude Code reads the clipboard on the remote server, not on your Mac, and a headless server has no clipboard. Dragging an image into the terminal also fails, because it pastes your Mac's file path, which doesn't exist on the server.
+
+The fix is to copy the image to the server first, then give Claude the file path.
+
+### Option 1: Save to a file and `scp` it
+1. Take the screenshot. On macOS, Cmd+Shift+4 saves it to the Desktop.
+2. Copy it to the server:
+   ```bash
+   scp ~/Desktop/Screenshot*.png myserver:/tmp/shot.png
+   ```
+3. In Claude Code on the server, mention the path:
+   > Look at /tmp/shot.png. Why is the layout broken?
+
+   Claude Code reads image files from disk and sees them the same way it would see a pasted image.
+
+### Option 2: Send the clipboard with one command
+Take the screenshot straight to the clipboard with Cmd+Ctrl+Shift+4. Then send it to the server with `pngpaste`:
+
+```bash
+brew install pngpaste   # one-time setup
+pngpaste - | ssh myserver 'cat > /tmp/clip.png'
+```
+
+You can wrap that in a shell alias, such as `sshot`, so the steps become: take screenshot → run `sshot` → tell Claude "see /tmp/clip.png". To keep more than one image, add a timestamp to the filename.
+
+### Option 3: VS Code / Cursor Remote-SSH
+If you run Claude Code in the integrated terminal of a Remote-SSH window, drag the image into the remote file explorer. That uploads it to the server. Then right-click → **Copy Path** and paste the path into Claude.
+
+### Option 4: Shared folder
+If you paste screenshots often, mount a remote directory locally with `sshfs` or a sync tool like Syncthing or Mutagen. Set macOS to save screenshots there: Cmd+Shift+5 → Options → Save to. Every screenshot then appears on the server automatically.
+
+Option 2 is the quickest for occasional use, and Option 4 is less hassle if you paste screenshots all the time.

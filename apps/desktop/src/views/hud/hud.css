@@ -1,0 +1,214 @@
+/* Floating beam HUD — the overlay shown during a shortcut beam.
+   Extends the app's identity: the translucent popover material, Geist, and the
+   blue "beam" gradient in motion (the signature — a beam sliding toward the host). */
+
+/* The HUD window is transparent and borderless; the pill is the only content. */
+html,
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  font-family: var(--font-system);
+  -webkit-font-smoothing: antialiased;
+}
+.hud-stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 6px 8px;
+}
+
+.hud__thumb {
+  width: 44px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  box-shadow: inset 0 0 0 0.5px var(--separator);
+}
+
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 300px;
+  padding: 11px 14px 12px;
+  border-radius: var(--radius-2xl);
+  background: var(--surface-overlay);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: var(--shadow-popover);
+  font-family: var(--font-system);
+  -webkit-font-smoothing: antialiased;
+  animation: hud-in var(--dur-base) var(--ease-out);
+}
+
+/* On failure the pill is clickable → opens the popover for recovery. */
+.hud[data-clickable] {
+  cursor: pointer;
+}
+.hud[data-clickable]:hover {
+  box-shadow:
+    var(--shadow-popover),
+    inset 0 0 0 1px var(--separator-strong);
+}
+.hud[data-clickable]:active {
+  transform: scale(0.99);
+}
+
+.hud__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hud__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud__ok {
+  color: var(--success);
+  flex: none;
+}
+.hud__err {
+  color: var(--danger);
+  flex: none;
+}
+.hud__warn {
+  color: var(--warning);
+  flex: none;
+}
+
+.hud__sub {
+  font-size: 11.5px;
+  color: var(--label-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hud__sub--mono {
+  font-family: var(--font-mono);
+}
+/* The reminder (ADR 0028): the one line on the pill that is a link. */
+.hud__sub--remind {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--accent);
+  font-weight: 500;
+}
+/* A flex row does not ellipsize its text; the span does, so a longer language
+   loses the end of the sentence and keeps the arrow. */
+.hud__sub-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hud[data-phase="failed"] .hud__sub {
+  color: var(--danger);
+}
+.hud[data-phase="partial"] .hud__sub {
+  color: var(--warning);
+}
+
+/* The signature: a slim lane with a beam of the brand gradient sliding toward the
+   host while in flight; it settles to a solid state when the beam lands or fails. */
+.hud__lane {
+  position: relative;
+  height: 3px;
+  margin-top: 4px;
+  border-radius: var(--radius-full);
+  background: var(--fill);
+  overflow: hidden;
+}
+.hud__beam {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+}
+
+.hud[data-phase="uploading"] .hud__beam,
+.hud[data-phase="landing"] .hud__beam {
+  width: 42%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: hud-beam 1.1s var(--ease-in-out) infinite;
+}
+/* A batch knows how far it has got, so the lane stops pretending and fills.
+   `--hud-progress` is set only when there is more than one file; without it the
+   rules above still run and nothing here applies. */
+.hud[data-phase="uploading"][style*="--hud-progress"] .hud__beam {
+  width: var(--hud-progress);
+  background: var(--accent);
+  animation: none;
+  transition: width 0.25s var(--ease-out);
+}
+.hud[data-phase="done"] .hud__beam {
+  width: 100%;
+  background: var(--success);
+}
+/* Stops where it stopped: the lane is the count, drawn. */
+.hud[data-phase="partial"] .hud__beam {
+  width: var(--hud-progress, 100%);
+  background: var(--warning);
+}
+.hud[data-phase="failed"] .hud__beam {
+  width: 100%;
+  background: var(--danger);
+  opacity: 0.55;
+}
+
+@keyframes hud-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hud-beam {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+/* Vestibular-safe fallback: the beam breathes in place instead of sliding. */
+@media (prefers-reduced-motion: reduce) {
+  .hud {
+    animation: none;
+  }
+  .hud[data-phase="uploading"] .hud__beam,
+  .hud[data-phase="landing"] .hud__beam {
+    width: 100%;
+    background: var(--accent);
+    animation: hud-fade 1.4s ease-in-out infinite;
+  }
+  @keyframes hud-fade {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}

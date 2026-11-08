@@ -1,0 +1,14 @@
+---
+import Changelog from "../../components/Changelog.astro";
+
+// /changelog/mac/ and /changelog/iphone/, the pages each app opens. Both always
+// exist: the iPhone app links to its page before its first release is written,
+// and App Review taps that link.
+export function getStaticPaths() {
+  return [{ params: { platform: "mac" } }, { params: { platform: "iphone" } }];
+}
+
+const { platform } = Astro.params as { platform: "mac" | "iphone" };
+---
+
+<Changelog lane={platform} />

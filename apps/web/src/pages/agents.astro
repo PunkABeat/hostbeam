@@ -1,0 +1,233 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.tsx";
+import CopyCommand from "../components/CopyCommand.tsx";
+import Footer from "../components/Footer.astro";
+
+// The page the MCP server's listings and posts point at.
+const REPO = "https://github.com/PunkABeat/hostbeam-mcp";
+const NPM = "https://www.npmjs.com/package/@hostbeam/mcp";
+const CLAUDE = "claude mcp add -s user hostbeam -- npx -y @hostbeam/mcp";
+const CODEX = "codex mcp add hostbeam -- npx -y @hostbeam/mcp";
+const JSON_CONFIG = `{
+  "mcpServers": {
+    "hostbeam": {
+      "command": "npx",
+      "args": ["-y", "@hostbeam/mcp"]
+    }
+  }
+}`;
+---
+
+<Base
+  title="Hostbeam for coding agents"
+  description="Install Hostbeam's MCP server on your host and your coding agent reads the screenshots you beam. No path to paste. Works with Claude Code, Codex and any MCP client."
+>
+  <div class="site" id="top">
+    <Nav />
+    <main class="wrap doc">
+      <h1 class="h2">Let the agent open the screenshot itself</h1>
+      <p class="lede">
+        Hostbeam beams a screenshot from your Mac or your iPhone to your server and puts its path
+        on your clipboard. The MCP server removes that last step: your agent asks for the screenshot and reads it, so there's
+        nothing to paste.
+      </p>
+
+      <div
+        class="term demo"
+        aria-label="A terminal session where a coding agent reads a beamed screenshot through Hostbeam's MCP server"
+      >
+        <div><span class="t-dim">dev@prod-box:~/app$</span> claude</div>
+        <div><span class="t-dim">›</span> The layout breaks on mobile. Look at the screenshot I just beamed.</div>
+        <div><span class="t-beam">● hostbeam · latest_screenshot</span></div>
+        <div><span class="t-land">✓</span> I see it. The nav wraps under 390px. Fixing.</div>
+      </div>
+
+      <section>
+        <h2>Install it on the host</h2>
+        <p>Install it on the server your agent runs on, not on your Mac. It needs Node 18 or later.</p>
+
+        <h3>Claude Code</h3>
+        <div class="cmd"><CopyCommand command={CLAUDE} client:visible /></div>
+        <p class="aside"><code class="mono">-s user</code> makes it available in every project on that host.</p>
+
+        <h3>Codex</h3>
+        <div class="cmd"><CopyCommand command={CODEX} client:visible /></div>
+
+        <h3>Any other MCP client</h3>
+        <pre class="term config">{JSON_CONFIG}</pre>
+
+        <p>
+          If the host can't reach npm, copy <code class="mono">hostbeam-mcp.mjs</code> from
+          <a href={REPO}>GitHub</a> and run it with <code class="mono">node</code>. It has no
+          dependencies. If you changed Hostbeam's folder for that host, give the server the same
+          folder with <code class="mono">HOSTBEAM_DIR</code>.
+        </p>
+      </section>
+
+      <section>
+        <h2>Then just ask</h2>
+        <p>
+          Beam a screenshot and ask the way you'd ask a person: “what does the screenshot I just
+          sent show?” The agent fetches your latest beam, with every file in it if you sent several,
+          and knows how long ago it arrived.
+        </p>
+      </section>
+
+      <section>
+        <h2>What the agent can use</h2>
+        <ul>
+          <li><code class="mono">latest_screenshot</code>: your most recent beam, as images.</li>
+          <li><code class="mono">list_screenshots</code>: recent beams with names, sizes and times, without image data.</li>
+          <li><code class="mono">read_screenshot</code>: one screenshot by name.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>What it won't do</h2>
+        <ul>
+          <li>Read anything except the screenshots Hostbeam beamed into that one folder.</li>
+          <li>
+            Read a file that isn't a picture. A PDF or a log you beam lands in the same folder, and
+            the path Hostbeam copies gives the agent its location to open with its own tools.
+          </li>
+          <li>Write, move or delete a file.</li>
+          <li>Follow a symlink, or read a folder that belongs to another user on the host.</li>
+          <li>
+            Hand a model an image it can't accept. A HEIC photo, or a file over 3.75 MB, comes back as
+            its path.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>If it doesn't work</h2>
+        <ul>
+          <li>
+            <b>The agent says there's no screenshot.</b> Check that
+            <code class="mono">claude mcp list</code> or <code class="mono">codex mcp list</code> shows
+            <code class="mono">hostbeam</code>, then ask the agent to use Hostbeam's latest screenshot.
+          </li>
+          <li>
+            <b>Codex misses it right after opening.</b> <code class="mono">npx</code> takes a few
+            seconds to start the server, so wait a moment before your first message.
+          </li>
+          <li>
+            <b>“Belongs to another user.”</b> On a shared host, someone else created that folder first.
+            Pick a folder of your own in Hostbeam, and set the same folder as
+            <code class="mono">HOSTBEAM_DIR</code>.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Start a beam from a script</h2>
+        <p>
+          The agent reads beams. Something else can start one: a shell script, a launcher, a
+          Shortcut, or the agent itself through a shell.
+        </p>
+        <ul>
+          <li>
+            <code class="mono">open hostbeam://beam</code> beams the screenshot on your clipboard,
+            exactly as the shortcut does.
+          </li>
+          <li>
+            <code class="mono">open "hostbeam://host?id=my-server"</code> changes which host beams go
+            to, using the name you gave it in Hostbeam.
+          </li>
+          <li>
+            <code class="mono">open -a Hostbeam shot.png</code> beams a file. This one needs no
+            permission and always works.
+          </li>
+        </ul>
+        <p>
+          The two links work out of the box, and one switch turns them off: Preferences → General
+          → Beaming → “Let other apps control Hostbeam”. If a link is ever ignored, that switch is
+          the place to look. A link can only ever choose between hosts you have already added, and
+          a web page cannot open one without your browser asking first. Needs Hostbeam 0.1.26 or
+          newer.
+        </p>
+      </section>
+
+      <section>
+        <h2>Free and open source</h2>
+        <p>
+          The server is one MIT-licensed file, on <a href={REPO}>GitHub</a> and
+          <a href={NPM}>npm</a>. It costs nothing, and beaming works as it always has, licensed or
+          not.
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Base>
+
+<style>
+  .doc {
+    max-width: 720px;
+    padding-top: 64px;
+    padding-bottom: 96px;
+  }
+  .doc h1 {
+    font-size: clamp(32px, 4.5vw, 48px);
+  }
+  .doc .lede {
+    margin-top: 20px;
+  }
+  .doc .demo {
+    margin-top: 32px;
+  }
+  .doc section {
+    margin-top: 44px;
+  }
+  .doc h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+  }
+  .doc h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 24px 0 0;
+  }
+  .doc p,
+  .doc ul {
+    margin: 14px 0 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .doc ul {
+    padding-left: 20px;
+  }
+  .doc li + li {
+    margin-top: 6px;
+  }
+  .doc b {
+    color: var(--ink);
+  }
+  .doc a {
+    color: var(--beam);
+  }
+  .doc code.mono {
+    font-size: 0.92em;
+    color: var(--ink);
+  }
+  .doc .cmd {
+    margin-top: 10px;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .doc .aside {
+    margin-top: 8px;
+    font-size: 13.5px;
+  }
+  .doc .config {
+    margin: 10px 0 0;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+</style>

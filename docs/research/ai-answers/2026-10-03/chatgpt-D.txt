@@ -1,0 +1,78 @@
+Site: ChatGPT (https://chatgpt.com, logged out, default settings; no model name shown in the UI)
+Question D: Is there a Mac app that sends screenshots to Claude Code over SSH?
+Timestamp: 2026-10-03T02:44:38Z
+Web sources cited: YES (searched the web on its own; inline citation chips + "Sources" panel)
+
+Inline links in the answer:
+- SSH Screenshot Bridge -> https://github.com/stefanomainardi/ssh-screenshot-bridge
+- Paste2SSH -> https://paste2ssh.com/
+- Image Paste for Remote SSH -> https://marketplace.visualstudio.com/items?itemName=asfeng.claude-code-image-paste
+- clipssh -> https://github.com/samuellawrentz/clipssh
+
+"Sources" panel (citation chips: GitHub, Uma Roy, Reddit, Visual Studio Marketplace, GitHub, GitHub):
+- GitHub - stefanomainardi/ssh-screenshot-bridge: macOS menu bar app + CLI that auto-uploads clipboard screenshots to remote machines via SSH. Built for AI coding tools (OpenCode, Claude Code) over SSH.
+  https://github.com/stefanomainardi/ssh-screenshot-bridge?utm_source=chatgpt.com
+- screencp - Uma Roy
+  https://uma.sh/blog/screencp/?utm_source=chatgpt.com
+- Reddit: "If you run Claude Code on a remote server, here's a free Mac app to paste screenshots straight into it"
+  https://www.reddit.com/r/ClaudeCode/comments/1ua0wg5/if_you_run_claude_code_on_a_remote_server_heres_a/?utm_source=chatgpt.com
+- Image Paste for Remote SSH (macOS) - Visual Studio Marketplace
+  https://marketplace.visualstudio.com/items?itemName=asfeng.claude-code-image-paste&utm_source=chatgpt.com
+
+--- Answer (verbatim innerText; single letters + names on their own line are citation chips) ---
+
+Yes. There are several, and a couple are specifically designed for Mac → remote machine over SSH → Claude Code.
+
+SSH Screenshot Bridge
+ — probably the closest match to what you're describing. It's a macOS menu-bar app that watches your clipboard, scps screenshots to the configured SSH host, and puts the remote file path back on your clipboard. It explicitly targets Claude Code/OpenCode over SSH.
+G
+GitHub
+
+screencp — another macOS menu-bar app. It reads your ~/.ssh/config, lets you choose the remote host, uploads the screenshot over SSH, and copies the resulting remote path. It also has a thumbnail/history UI.
+U
+Uma Roy
+
+Paste2SSH
+ — a newer Mac app aimed at making this feel like ordinary paste: screenshot → ⌘V in your terminal → the image is uploaded and the remote path is inserted. The project author describes it as free, local/no-cloud, and using your existing SSH config.
+R
+Reddit
+
+Image Paste for Remote SSH
+ — if you're already using VS Code Remote-SSH, this is particularly convenient. Copy a screenshot and press Alt+I; it transfers the PNG to the remote machine and inserts its path into the terminal.
+V
+Visual Studio Marketplace
+
+clipssh
+ — CLI rather than a Mac GUI, but very lightweight: screenshot to clipboard → command uploads it over SSH → remote path goes onto your clipboard.
+G
+GitHub
+
+What I'd use
+
+If you mean "I run Claude Code in an SSH terminal on a Linux box and want Mac screenshots to just work", I'd try SSH Screenshot Bridge or Paste2SSH first.
+
+The ideal workflow is:
+
+Mac screenshot
+     ↓
+clipboard
+     ↓
+[Mac menu-bar app]
+     ↓ scp
+remote:/tmp/screenshot.png
+     ↓
+remote path copied to clipboard
+     ↓
+paste into Claude Code
+
+
+There's also an interesting wrinkle: recent Claude Code versions have had issues with direct image Ctrl+V over SSH/OSC 52, so a tool that actually transfers the file to the remote host is more robust than relying on terminal clipboard forwarding.
+G
+GitHub
+
+If you tell me whether you're using Terminal/iTerm2 directly or VS Code Remote-SSH, I can narrow this down to the cleanest setup.
+
+G
+U
+R
+Sources

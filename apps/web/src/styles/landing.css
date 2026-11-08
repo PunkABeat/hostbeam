@@ -1,0 +1,519 @@
+/* Hostbeam marketing site.
+   The page is dressed like the app: a plain cool-white ground, ink-navy text,
+   the brand beam blue as the only accent, Geist (the app's own UI face) for
+   display and body. Monospace follows the app's rule from the voice doc —
+   paths, hostnames and hotkeys only, in the system mono the app itself uses.
+   No page grid, no annotation layer: the app is a menu-bar glyph that
+   disappears, and the site should not be louder than the thing it sells. (The
+   graph-paper ground came back briefly and went again — looked at next to the
+   rest of the restyle, the plain ground won.)
+   Dark variant follows the system scheme via `.theme-dark` on <html> (same
+   contract as the desktop app). App tokens still come from
+   @hostbeam/ui/styles.css; the page defines its own surface system on top. */
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+html, body { margin: 0; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.site {
+  /* cool white, never cream */
+  --paper: #f5f8fc;
+  --paper-raised: #ffffff;
+  --hairline: #d3ddec;
+  --ink: #10203b;
+  --ink-soft: #43567a;
+  --ink-faint: #7d8dab;
+  --beam: #2d6cf6;
+  --beam-sky: #5a95ff;
+  --beam-tint: #e7effe;
+  --land: #1f9d61;
+  --plate-shadow: 0 1px 2px rgba(16, 32, 59, 0.05), 0 12px 32px -24px rgba(16, 32, 59, 0.25);
+  --font-display: "Geist", -apple-system, "Helvetica Neue", sans-serif;
+  --font-body: "Geist", -apple-system, "Segoe UI", sans-serif;
+  /* the app's own mono stack — SF Mono on a Mac, the system mono elsewhere.
+     Nothing is downloaded for it, and it matches what the app renders. */
+  --font-mono-site: ui-monospace, "SF Mono", Menlo, monospace;
+  /* keep the app tokens the shared components read pointed at page values */
+  --page-bg: var(--paper);
+  --page-card: var(--paper-raised);
+
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+.theme-dark .site {
+  --paper: #0a1424;
+  --paper-raised: #101d33;
+  --hairline: #22324f;
+  --ink: #e7edf8;
+  --ink-soft: #a7b5cf;
+  --ink-faint: #64769a;
+  --beam: #4c8dff;
+  --beam-sky: #77a9ff;
+  --beam-tint: #14284d;
+  --land: #35c47f;
+  --plate-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -24px rgba(0, 0, 0, 0.6);
+}
+
+body {
+  background: #f5f8fc;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.theme-dark body { background: #0a1424; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+a { color: inherit; }
+
+/* ----- Type ----- */
+.display-line { display: block; }
+.display-accent { color: var(--beam); }
+.display {
+  font-family: var(--font-display);
+  /* The hero column is ~490px wide at the page's max width, so 72px broke the
+     headline over four lines and shouted at a reader looking at a menu-bar
+     utility. 56px sets it in three and matches the volume of the product. */
+  font-size: clamp(38px, 4.6vw, 56px);
+  line-height: 1.06;
+  letter-spacing: -0.042em;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.h2 {
+  font-family: var(--font-display);
+  font-size: clamp(29px, 3.6vw, 42px);
+  line-height: 1.06;
+  letter-spacing: -0.032em;
+  font-weight: 650;
+  margin: 0;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.lede {
+  font-size: clamp(16px, 1.55vw, 19px); line-height: 1.6; color: var(--ink-soft);
+  margin: 24px 0 0; max-width: 34em; text-wrap: pretty;
+}
+.sub {
+  font-size: clamp(15px, 1.4vw, 17px); line-height: 1.6; color: var(--ink-soft);
+  margin: 16px 0 0; max-width: 34em; text-wrap: pretty;
+}
+/* Mono is for the literal only: paths, hostnames, addresses, hotkeys — values
+   the reader could type. That rule is the product's (01_product_and_voice.md),
+   and the page follows it. Captions and meta lines are not values, so they are
+   set in the body face like everything else. */
+.mono { font-family: var(--font-mono-site); }
+
+/* small caption / meta line */
+.note { font-size: 12.5px; color: var(--ink-faint); }
+
+/* The hero's negative space: the three things Hostbeam does not do, stated
+   where a sceptical reader is still deciding whether to keep reading. These are
+   the privacy section's three claims word for word, so the page cannot drift
+   against itself — change them in one place and you have changed them in both.
+   Deliberately not the fine print under the CTAs: that line is the terms ("Free
+   to use"), this one is the argument. */
+.claims {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0 18px;
+  list-style: none; margin: 18px 0 0; padding: 0;
+  font-size: 14px; font-weight: 500; color: var(--ink-soft);
+}
+.claims li { position: relative; }
+.claims li + li::before {
+  content: ""; position: absolute; left: -10.5px; top: 50%;
+  width: 3px; height: 3px; margin-top: -1.5px; border-radius: 50%;
+  background: var(--ink-faint);
+}
+
+/* ----- Buttons ----- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  height: 48px; padding: 0 22px; border-radius: 10px; border: 0; cursor: pointer;
+  font-family: var(--font-body); font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+  text-decoration: none; transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--beam); color: #fff;
+  box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--beam) 70%, transparent);
+}
+.btn-primary:hover { background: color-mix(in srgb, var(--beam) 88%, #10203b); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-ghost {
+  background: var(--paper-raised); color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.btn-ghost:hover { box-shadow: inset 0 0 0 1px var(--ink-faint); }
+.btn-ink {
+  background: var(--ink); color: var(--paper);
+  box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--ink) 60%, transparent);
+}
+.btn-ink:hover { background: color-mix(in srgb, var(--ink) 88%, var(--beam)); }
+.btn-ink:active { transform: scale(0.98); }
+.btn-sm { height: 38px; padding: 0 16px; font-size: 13.5px; border-radius: 8px; }
+
+button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--beam); outline-offset: 3px; border-radius: 8px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* ----- Nav ----- */
+.nav {
+  position: sticky; top: 0; z-index: 40;
+  -webkit-backdrop-filter: saturate(160%) blur(16px); backdrop-filter: saturate(160%) blur(16px);
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  box-shadow: inset 0 -1px 0 var(--hairline);
+}
+.nav-in { display: flex; align-items: center; gap: 14px; height: 60px; }
+.nav-link { font-size: 13.5px; color: var(--ink-soft); text-decoration: none; padding: 8px 10px; border-radius: 8px; }
+.nav-link:hover { color: var(--ink); }
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 8px; border: 0; cursor: pointer;
+  background: transparent; color: var(--ink-soft);
+}
+.theme-toggle:hover { color: var(--ink); background: var(--beam-tint); }
+.theme-toggle .tt-sun { display: none; }
+.theme-dark .theme-toggle .tt-sun { display: block; }
+.theme-dark .theme-toggle .tt-moon { display: none; }
+
+/* ----- Plates (drawing plates, not "cards") ----- */
+.plate {
+  background: var(--paper-raised);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--plate-shadow);
+}
+/* legacy alias — buy/thanks pages */
+.card { background: var(--paper-raised); border: 1px solid var(--hairline); border-radius: 14px; box-shadow: var(--plate-shadow); }
+
+/* ----- The beam rail (how-it-works stations) ----- */
+.rail { position: relative; }
+.rail::before {
+  content: ""; position: absolute; left: 11px; top: 14px; bottom: 14px; width: 2px;
+  background: linear-gradient(var(--beam), var(--beam-sky));
+  border-radius: 2px;
+}
+.station { position: relative; padding: 0 0 44px 52px; }
+.station:last-child { padding-bottom: 0; }
+.station-dot {
+  position: absolute; left: 0; top: 2px; width: 24px; height: 24px; border-radius: 999px;
+  background: var(--paper-raised); border: 2px solid var(--beam);
+  display: inline-flex; align-items: center; justify-content: center; color: var(--beam);
+}
+.station h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin: 0; color: var(--ink); }
+.station p { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); margin: 7px 0 0; max-width: 34em; text-wrap: pretty; }
+
+/* ----- Terminal strip (the agent moment) ----- */
+.term {
+  background: #0c1626; border: 1px solid #22324f; border-radius: 14px;
+  padding: 22px 26px; color: #dfe8f6;
+  font-family: var(--font-mono-site); font-size: 13.5px; line-height: 2.0;
+  box-shadow: var(--plate-shadow);
+  overflow-x: auto;
+}
+.term .t-dim, .iphone-term .t-dim { color: #64769a; }
+.term .t-beam, .iphone-term .t-beam { color: #77a9ff; }
+.term .t-land, .iphone-term .t-land { color: #4fd393; }
+.term .t-caret { display: inline-block; width: 8px; height: 15px; background: #77a9ff; vertical-align: -2px; margin-left: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .term .t-caret { animation: caret 1.1s steps(1) infinite; }
+}
+@keyframes caret { 50% { opacity: 0; } }
+
+/* ----- Spec sheet (features) ----- */
+.spec { border-top: 1px solid var(--hairline); }
+.spec-row {
+  display: grid; grid-template-columns: 200px 1fr; gap: 24px;
+  padding: 18px 4px; border-bottom: 1px solid var(--hairline); align-items: baseline;
+}
+.spec-key { font-family: var(--font-mono-site); font-size: 13px; color: var(--beam); letter-spacing: 0.01em; }
+.spec-val { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); text-wrap: pretty; }
+.spec-val b { color: var(--ink); font-weight: 600; }
+
+/* ----- macOS desktop scene (hero demo, daylight wall) ----- */
+.scene {
+  position: relative; border-radius: 16px; overflow: hidden;
+  background: radial-gradient(120% 95% at 78% 6%, #bcd3f7 0%, #8fb4ee 46%, #6a94dd 100%);
+  border: 1px solid var(--hairline);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset, 0 30px 70px -20px rgba(20, 40, 80, 0.35);
+  aspect-ratio: 7 / 6;
+}
+.theme-dark .scene { background: radial-gradient(120% 95% at 78% 6%, #46506a 0%, #2a3346 46%, #161c28 100%); }
+.scene-mb {
+  position: absolute; top: 0; left: 0; right: 0; height: 30px; z-index: 5;
+  border-radius: 16px 16px 0 0;
+  display: flex; align-items: center; gap: 18px; padding: 0 14px; color: #fff;
+  background: rgba(20, 22, 28, 0.34); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: inset 0 -0.5px 0 rgba(255, 255, 255, 0.08);
+}
+.mb-app { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 22px; border-radius: 5px; background: rgba(255, 255, 255, 0.20); }
+.scene-anchor { position: absolute; top: 38px; right: 5%; z-index: 6; transform-origin: top right; transform: scale(0.87); }
+/* The hero is the Mac popover on a Mac desktop, and nothing else. The iPhone
+   has its own section; parking it over the popover made a Mac utility look
+   like a cross-platform suite. */
+.hero-visual { position: relative; }
+
+/* ----- iPhone mock (15/16-class proportions: screen 393×852 pt) ----- */
+.iphone {
+  position: relative; width: 312px; margin: 0 auto;
+  border-radius: 55px; padding: 11px;
+  background: linear-gradient(145deg, #3c414c, #14161c 40%, #262b36);
+  box-shadow: 0 34px 80px -26px rgba(16, 32, 59, 0.55),
+    inset 0 0 0 2.5px #0b0d12, inset 0 0 0 4px #4a505c;
+}
+.iphone-screen {
+  position: relative; overflow: hidden; border-radius: 44px;
+  background: var(--paper); aspect-ratio: 393 / 852;
+  display: flex; flex-direction: column;
+}
+.iphone-island {
+  position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 92px; height: 27px; border-radius: 16px; background: #000; z-index: 4;
+}
+.iphone-status {
+  position: relative; z-index: 3; display: flex; align-items: center;
+  padding: 14px 26px 0; color: #fff; height: 44px; flex: none;
+}
+.iphone-status .ist-time { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; flex: 1; font-variant-numeric: tabular-nums; }
+.iphone-status .ist-icons { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 6px; }
+.iphone-shot {
+  flex: 1; margin-top: -44px; position: relative;
+  background: linear-gradient(160deg, #6a94dd, #2c5cb8 70%, #1f3f86);
+  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 16px;
+}
+.iphone-shot::after { content: ""; position: absolute; inset: 0; background: rgba(10, 20, 36, 0.30); }
+.iphone-shot .note { position: relative; z-index: 1; }
+.iphone-shot-ui { position: absolute; top: 76px; left: 26px; right: 26px; z-index: 1; }
+.iphone-sheet {
+  flex: none; position: relative; z-index: 2;
+  background: var(--paper-raised); border-top: 1px solid var(--hairline);
+  border-radius: 18px 18px 0 0; margin-top: -18px;
+  padding: 9px 18px 26px;
+}
+.iphone-grabber { width: 36px; height: 4px; border-radius: 2px; background: var(--hairline); margin: 0 auto 13px; }
+.iphone-home {
+  position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
+  width: 118px; height: 5px; border-radius: 3px; background: var(--ink); opacity: 0.85;
+}
+/* The demo's last screen: an SSH app on the same phone, where the path is
+   pasted. Dark in both themes, like the terminal strip it mirrors. */
+.iphone-term {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column;
+  padding-top: 44px; background: #0c1626; color: #dfe8f6;
+}
+.iphone-term-bar {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 6px 14px 10px; border-bottom: 1px solid #22324f;
+  font-size: 12.5px; font-weight: 600;
+}
+.iphone-term-dot { width: 6px; height: 6px; border-radius: 999px; background: #4fd393; }
+.iphone-term-body {
+  flex: 1; padding: 12px 16px; font-family: var(--font-mono-site); font-size: 10.5px;
+  line-height: 1.75; overflow-wrap: anywhere;
+}
+.iphone-term-body > div + div { margin-top: 6px; }
+/* The extra-keys row every SSH app puts above the keyboard. */
+.iphone-term-keys {
+  display: flex; gap: 6px; padding: 8px 12px 30px; border-top: 1px solid #22324f;
+  font-family: var(--font-mono-site); font-size: 10px; color: #9fb0cc;
+}
+.iphone-term-keys span {
+  flex: 1; text-align: center; padding: 6px 0; border-radius: 6px; background: #17243a;
+}
+.iphone-term .iphone-home { background: #dfe8f6; opacity: 0.6; }
+@media (prefers-reduced-motion: no-preference) {
+  .iphone-term { animation: app-in 0.3s ease-out both; }
+  .iphone-term .t-in { animation: line-in 0.3s ease-out both; }
+}
+@keyframes app-in { from { opacity: 0; transform: scale(0.97); } }
+@keyframes line-in { from { opacity: 0; transform: translateY(4px); } }
+.iphone-btn {
+  position: absolute; right: -2.5px; width: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, #2a2f3a, #14161c);
+}
+.iphone-btn.ib-power { top: 190px; height: 64px; }
+.iphone-btn.ib-action { left: -2.5px; right: auto; top: 130px; height: 26px; }
+.iphone-btn.ib-volup { left: -2.5px; right: auto; top: 172px; height: 42px; }
+.iphone-btn.ib-voldn { left: -2.5px; right: auto; top: 222px; height: 42px; }
+
+/* ----- "Coming soon" state -----
+   Shaped like the page's buttons so it reads as the thing that will be one,
+   but flat and unclickable: nothing here should look like a link while the
+   App Store record still 404s. */
+.badge-soon {
+  display: inline-flex; align-items: center; gap: 9px;
+  height: 48px; padding: 0 20px; border-radius: 10px;
+  background: var(--beam-tint);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--beam) 26%, transparent);
+  color: var(--beam);
+  font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* ----- beam-mark upload animation (BeamMark, shared with the app) ----- */
+.bm .bm-ring { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.bm .bm-node { transform-box: fill-box; transform-origin: center; }
+.bm-bar { height: 100%; background: var(--beam); border-radius: 3px; width: 100%; }
+@media (prefers-reduced-motion: no-preference) {
+  .bm-uploading .bm-el { animation: bmPulse 1.25s ease-in-out infinite; }
+  .bm-uploading .bm-ring { animation: bmRing 1.25s ease-out infinite; animation-delay: .36s; }
+  .bm-landing .bm-ring { animation: bmRing .72s ease-out 1 forwards; }
+  .bm-landing .bm-node { animation: bmPop .6s ease-out 1; }
+  .bm-bar { width: 45%; animation: bmBar 1.1s ease-in-out infinite; }
+  .bm-bar.done { width: 100%; animation: none; transform: none; transition: width .3s ease; }
+}
+@keyframes bmPulse { 0%, 100% { opacity: .38; } 14% { opacity: 1; } 42% { opacity: .38; } }
+@keyframes bmRing { 0% { opacity: .5; transform: scale(.55); } 46% { opacity: 0; transform: scale(2); } 100% { opacity: 0; transform: scale(2); } }
+@keyframes bmPop { 0% { transform: scale(1); } 40% { transform: scale(1.24); } 100% { transform: scale(1); } }
+@keyframes bmBar { 0% { transform: translateX(-120%); } 100% { transform: translateX(260%); } }
+@keyframes mbBeaming { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: no-preference) { .mb-app.beaming img { animation: mbBeaming 1.1s ease-in-out infinite; } }
+
+/* ----- Pricing: one plate, two columns -----
+   Not two tier cards. A tool is free to use and has a price; it does not
+   have "plans", and the glowing recommended tier is a subscription idiom
+   borrowed from software that bills monthly. The terms still have to be
+   here in full — three Macs, every Hostbeam 1 update, the app never stops
+   working — because those are exactly what a buyer of a one-person Mac tool
+   is trying to find out. */
+.tiers {
+  display: grid; grid-template-columns: 1fr 1fr;
+  max-width: 820px; margin: 40px auto 0;
+  background: var(--paper-raised);
+  border: 1px solid var(--hairline); border-radius: 14px;
+  box-shadow: var(--plate-shadow);
+  overflow: hidden;
+}
+.tier { padding: 30px 30px 32px; display: flex; flex-direction: column; }
+.tier + .tier { border-left: 1px solid var(--hairline); }
+.tier-name { font-size: 13px; font-weight: 600; color: var(--ink-faint); margin: 0; letter-spacing: 0.01em; }
+.tier-price {
+  font-family: var(--font-display); font-size: 38px; font-weight: 600;
+  letter-spacing: -0.03em; color: var(--ink); margin: 10px 0 0;
+}
+.tier-price small { font-family: var(--font-body); font-size: 13px; font-weight: 400; color: var(--ink-faint); margin-left: 8px; letter-spacing: 0; }
+.tier ul { list-style: none; padding: 0; margin: 22px 0 0; display: flex; flex-direction: column; gap: 11px; }
+.tier li { font-size: 14px; line-height: 1.55; color: var(--ink-soft); text-wrap: pretty; padding-left: 15px; position: relative; }
+.tier li::before { content: ""; position: absolute; left: 0; top: 9px; width: 5px; height: 5px; border-radius: 5px; background: var(--beam); }
+/* the two buttons line up on the plate's baseline even though the free column
+   has one fewer term */
+.tier-cta { margin-top: auto; padding-top: 26px; }
+@media (max-width: 700px) {
+  .tiers { grid-template-columns: 1fr; }
+  .tier + .tier { border-left: 0; border-top: 1px solid var(--hairline); }
+}
+
+/* ----- Closing call to action -----
+   A plate on the page's own ground, not a saturated gradient banner. The
+   download button and the brew line are the whole message. */
+.cta {
+  max-width: 720px; margin: 0 auto; text-align: center;
+  background: var(--paper-raised);
+  border: 1px solid var(--hairline); border-radius: 16px;
+  box-shadow: var(--plate-shadow);
+  padding: 52px 40px 46px;
+}
+
+/* ----- Copyable command ----- */
+.copycmd {
+  display: inline-flex; align-items: center; gap: 2px;
+  border: 1px solid var(--hairline); border-radius: 8px;
+  background: var(--paper-raised);
+  padding: 4px 4px 4px 11px;
+  max-width: 100%;
+}
+/* On a phone the command wraps rather than scrolls: iOS hides the scrollbar,
+   so a scrolled command just looked cut off. It breaks only between words —
+   never inside `--cask` or `punkabeat/tap/hostbeam` — and the copy button
+   copies the prop, not the wrapped text. */
+.copycmd code { font-size: 13px; line-height: 1.5; color: var(--ink-soft); overflow-x: auto; }
+.copycmd-word { white-space: nowrap; }
+.copycmd-btn {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border: 0; border-radius: 6px; cursor: pointer;
+  background: transparent; color: var(--ink-faint);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.copycmd-btn:hover { color: var(--ink); background: var(--fill, rgba(16, 32, 59, 0.05)); }
+.copycmd-btn:active { transform: scale(0.94); }
+
+/* visually hidden, still announced */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ----- FAQ ----- */
+.faq-q { font-size: 16px; font-weight: 600; color: var(--ink); margin: 0; letter-spacing: -0.01em; }
+.faq-a { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); margin: 8px 0 0; text-wrap: pretty; }
+
+/* ----- Layout grids ----- */
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; align-items: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: center; }
+.faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 48px; }
+
+/* ----- Responsive ----- */
+@media (max-width: 980px) {
+  /* minmax(0, …), as above: a bare 1fr track is never narrower than its
+     content, and the hero's one-line brew command then pushed the whole
+     column (buttons, demo, headline) past a phone's right edge. */
+  .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; max-width: 600px; }
+  .split { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .faq-grid { grid-template-columns: 1fr; gap: 0; }
+  .spec-row { grid-template-columns: 1fr; gap: 6px; }
+  .nav-hide-sm { display: none; }
+  section { padding-top: 64px !important; padding-bottom: 64px !important; }
+}
+@media (max-width: 560px) {
+  .wrap { padding: 0 20px; }
+  .scene-anchor { right: 3%; transform: scale(0.84); }
+  .hero-cta { width: 100%; }
+  .hero-cta .btn { width: 100%; }
+  .cta { padding: 40px 20px 36px; }
+  .display { font-size: clamp(32px, 9vw, 40px); }
+  .iphone { width: 272px; }
+}
+.store-qr { display: flex; align-items: center; gap: 12px; }
+@media (max-width: 700px) { .store-qr { display: none; } }
+
+/* The launch film (FilmLink.tsx): a quiet third item in the hero's buttons,
+   and a native <dialog> sized so the whole 16:9 frame fits any screen,
+   a phone held sideways included. */
+.film-link {
+  display: inline-flex; align-items: center; gap: 9px; padding: 6px 4px;
+  border: 0; background: transparent; cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 500; color: var(--ink-soft);
+}
+.film-link:hover { color: var(--ink); }
+.film-link:focus-visible { outline: 2px solid var(--beam); outline-offset: 2px; border-radius: 8px; }
+.film-link-play {
+  width: 28px; height: 28px; border-radius: 50%; flex: none;
+  display: inline-flex; align-items: center; justify-content: center; padding-left: 2px;
+  background: var(--beam-tint); color: var(--beam); border: 1px solid var(--hairline);
+}
+.film-len { color: var(--ink-faint); font-weight: 400; }
+.film-dialog {
+  padding: 0; border: 0; background: transparent; overflow: visible;
+  max-width: none; max-height: none;
+  width: min(1040px, calc(100vw - 32px), calc((100dvh - 120px) * 16 / 9));
+}
+.film-dialog::backdrop { background: rgba(4, 9, 20, 0.82); }
+.film-frame { position: relative; }
+.film-frame video {
+  display: block; width: 100%; aspect-ratio: 16 / 9; background: #000;
+  border-radius: 12px; box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+}
+.film-close {
+  position: absolute; top: -46px; right: 0; width: 36px; height: 36px; border-radius: 50%;
+  border: 0; background: rgba(255, 255, 255, 0.14); color: #fff; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.film-close:hover { background: rgba(255, 255, 255, 0.24); }
+.film-close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.store-qr-code {
+  background: #fff; border: 1px solid var(--hairline); border-radius: 10px;
+  padding: 8px; display: inline-flex; flex: none;
+}

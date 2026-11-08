@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+"""The host end of the Ctrl+V spike (next.md § 10a). Findings: README.md.
+
+Installed as `xclip` and `wl-paste` in ~/.local/bin, ahead of any real ones.
+Claude Code on a headless Linux host asks `xclip` for the clipboard's targets
+and then for image/png when you press Ctrl+V; this answers by asking the Mac
+through ~/.hostbeam/clipboard.sock. No one there: it exits 1 with nothing on
+stdout, which Claude Code reports as "No image found in clipboard".
+
+Two ways the socket gets there:
+
+- `hostbeam-clip serve`, run by the Mac as its SSH connection's command
+  (the default): it owns the socket and relays each request over the
+  session's stdin/stdout. Needs nothing from sshd but running a command.
+- sshd forwarding it (`ssh -R`): refused wherever AllowTcpForwarding is
+  off — OpenSSH applies that to Unix-socket forwards too — which includes
+  Alpine's stock sshd_config and so this test host.
+
+Spike-grade on purpose: Python, because it is on the test host. The product's
+stand-in is a decision (next.md § 10a): code installed on the user's host.
+
+Every call is logged with its parent processes to ~/.hostbeam/stand-in.log,
+because who is asking — Ctrl+V, or the agent running `xclip` itself — is the
+question the consent model turns on.
+"""
+import os
+import select
+import signal
+import socket
+import sys
+import time
+
+HOME = os.path.expanduser("~/.hostbeam")
+SOCK = os.path.join(HOME, "clipboard.sock")
+NAME = os.path.basename(sys.argv[0])
+ARGS = sys.argv[1:]
+
+
+def ancestry():
+    chain, pid = [], os.getppid()
+    for _ in range(6):
+        try:
+            with open(f"/proc/{pid}/cmdline", "rb") as f:
+                cmd = f.read().replace(b"\0", b" ").decode(errors="replace").strip()
+            with open(f"/proc/{pid}/stat") as f:
+                ppid = int(f.read().rsplit(")", 1)[1].split()[1])
+        except OSError:
+            break
+        chain.append(f"{pid}:{cmd[:80]}")
+        if ppid <= 1:
+            break
+        pid = ppid
+    return " <- ".join(chain)
+
+
+def log(result):
+    try:
+        with open(os.path.join(HOME, "stand-in.log"), "a") as f:
+            f.write(f"{time.strftime('%H:%M:%S')} {NAME} {' '.join(ARGS)} -> {result} | {ancestry()}\n")
+    except OSError:
+        pass
+
+
+def ask(request):
+    """One request per connection. Returns the body, or None for no answer."""
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.settimeout(10)
+    try:
+        s.connect(SOCK)
+        s.sendall(request.encode() + b"\n")
+        f = s.makefile("rb")
+        head = f.readline().decode(errors="replace").strip()
+        if not head.startswith("OK "):
+            return None
+        size = int(head[3:])
+        body = f.read(size)
+        return body if len(body) == size else None
+    except (OSError, ValueError):
+        return None
+    finally:
+        s.close()
+
+
+def value(flags):
+    for i, a in enumerate(ARGS):
+        if a in flags and i + 1 < len(ARGS):
+            return ARGS[i + 1]
+        for flag in flags:
+            if flag.startswith("--") and a.startswith(flag + "="):
+                return a.split("=", 1)[1]
+    return None
+
+
+def wanted():
+    """The target asked for: 'TARGETS', a MIME type, or None (unsupported)."""
+    if NAME == "xclip":
+        if not any(a in ("-o", "-out") for a in ARGS):
+            return None  # copying *to* the Mac is not this spike
+        if (value(["-selection", "-sel"]) or "primary") not in ("clipboard", "c", "clip"):
+            return None
+        return value(["-t", "-target"]) or "text/plain"
+    if NAME == "wl-paste":
+        if any(a in ("-l", "--list-types") for a in ARGS):
+            return "TARGETS"
+        return value(["-t", "--type"]) or "text/plain"
+    return None
+
+
+REQUESTS = {b"TARGETS", b"GET image/png"}
+
+
+def serve():
+    """Own the socket; relay each request to the Mac over stdout/stdin.
+
+    One request at a time: a clipboard is asked for serially, and it keeps
+    the stream unframed beyond "REQ <line>" out and "OK <n>"/"NO" back.
+    """
+    os.makedirs(HOME, mode=0o700, exist_ok=True)
+    os.chmod(HOME, 0o700)
+    # Last connection wins: a socket left by a dropped one is replaced here,
+    # which sshd's own forwarding cannot do (StreamLocalBindUnlink is off by
+    # default).
+    try:
+        os.unlink(SOCK)
+    except FileNotFoundError:
+        pass
+    old = os.umask(0o177)
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(SOCK)
+    os.umask(old)
+    ours = os.stat(SOCK).st_ino
+    server.listen(8)
+
+    for sig in (signal.SIGHUP, signal.SIGTERM, signal.SIGINT):
+        signal.signal(sig, lambda *_: sys.exit(0))
+    to_mac, from_mac = sys.stdout.buffer, sys.stdin.buffer
+    to_mac.write(b"READY\n")
+    to_mac.flush()
+    try:
+        while True:
+            ready, _, _ = select.select([server, from_mac], [], [])
+            if from_mac in ready:
+                return 0  # the Mac only speaks when asked: this is EOF
+            conn, _ = server.accept()
+            with conn:
+                conn.settimeout(5)
+                try:
+                    request = conn.makefile("rb").readline().strip()
+                except OSError:
+                    continue
+                if request not in REQUESTS:
+                    conn.sendall(b"NO\n")
+                    continue
+                to_mac.write(b"REQ " + request + b"\n")
+                to_mac.flush()
+                head = from_mac.readline()
+                if not head:
+                    return 0
+                body = b""
+                if head.startswith(b"OK "):
+                    size = int(head[3:])
+                    body = from_mac.read(size)
+                try:
+                    conn.sendall(head + body)
+                except OSError:
+                    pass  # the asker gave up; the stream to the Mac is intact
+    finally:
+        # Only our own socket: a newer connection may have replaced it.
+        try:
+            if os.stat(SOCK).st_ino == ours:
+                os.unlink(SOCK)
+        except FileNotFoundError:
+            pass
+
+
+def main():
+    if NAME == "hostbeam-clip" and ARGS[:1] == ["serve"]:
+        return serve()
+    target = wanted()
+    if target == "TARGETS":
+        body = ask("TARGETS")
+        if NAME == "wl-paste" and body:
+            body = b"\n".join(t for t in body.split(b"\n") if t and t != b"TARGETS") + b"\n"
+    elif target == "image/png":
+        body = ask("GET image/png")
+    else:
+        body = None  # text, other image types, copying in: not this spike
+    log(f"{len(body)} bytes" if body else "nothing")
+    if not body:
+        return 1
+    sys.stdout.buffer.write(body)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

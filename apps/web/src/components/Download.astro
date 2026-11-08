@@ -1,0 +1,52 @@
+---
+// The closing call to action. It used to be a saturated blue gradient banner,
+// which is the one shape on the page that belonged to a service rather than a
+// tool. A plate on the page's own ground says the same thing: here is the
+// download, here is the cask, here is what it costs.
+//
+// This is an .astro component rather than a React one so that the copy button
+// is the only thing on the section that hydrates — a client: directive cannot
+// be applied from inside a React tree, and hydrating the whole section to get
+// one button would be backwards.
+import { Ic } from "@hostbeam/ui";
+import CopyCommand from "./CopyCommand.tsx";
+import { APP_STORE_URL, BREW_COMMAND, DMG_URL, RAYCAST_URL } from "../lib/links";
+---
+
+<section id="download" style="padding: 20px 0 72px">
+  <div class="wrap">
+    <div class="cta">
+      <img
+        src="/assets/hostbeam-icon.svg"
+        width="64"
+        height="64"
+        alt=""
+        style="border-radius: 15px; box-shadow: 0 6px 20px -6px rgba(16, 32, 59, 0.35)"
+      />
+      <h2 class="h2" style="font-size: clamp(26px, 3.4vw, 38px); margin: 22px 0 0">
+        Put your screenshots and files where your code lives.
+      </h2>
+      <p class="sub" style="margin: 14px auto 0; max-width: 30em">
+        Download Hostbeam, point it at a host, and beam your first screenshot in under a minute.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 12px; margin-top: 30px; flex-wrap: wrap">
+        <a class="btn btn-primary" href={DMG_URL}>
+          <Ic name="upload" size={17} /> Download for macOS
+        </a>
+        <a class="btn btn-ghost" href={APP_STORE_URL}>
+          <Ic name="smartphone" size={16} /> The iPhone companion
+        </a>
+      </div>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 22px; flex-wrap: wrap">
+        <span class="note">or</span>
+        <CopyCommand command={BREW_COMMAND} client:visible />
+      </div>
+      <p class="note" style="margin-top: 14px">
+        Free to use, with no limit. macOS 13 and later; the iPhone app needs iOS 17.
+      </p>
+      <p class="note" style="margin-top: 8px">
+        Live in Raycast? <a href={RAYCAST_URL} style="color: inherit">Get the extension</a> to beam from your launcher. It drives the Mac app.
+      </p>
+    </div>
+  </div>
+</section>

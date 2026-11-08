@@ -1,0 +1,48 @@
+Claude Code 2.1.288 (Claude Code) · 2026-10-03T02:46:57Z · question E
+Q: How do I open a dev server running on a remote server in my Mac's browser when ssh -L says "administratively prohibited"?
+---
+That message comes from the remote `sshd`, not your Mac. The server refused the port-forward request. It's usually caused by `AllowTcpForwarding no`, `DisableForwarding yes`, or a `PermitOpen` rule that doesn't match the destination you asked for. Here are your options, starting with the simplest.
+
+## 1. Use `127.0.0.1` instead of `localhost`
+
+If the server limits forwarding with `PermitOpen`, the destination you request has to match the rule exactly. `localhost` may not match a rule written for `127.0.0.1`:
+
+```bash
+ssh -N -L 3000:127.0.0.1:3000 user@server
+```
+
+Then open `http://localhost:3000` on your Mac.
+
+## 2. Enable forwarding on the server (if you have sudo)
+
+```bash
+sudo grep -rniE 'AllowTcpForwarding|DisableForwarding|PermitOpen|Match' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/
+```
+
+Set `AllowTcpForwarding yes`, or `local`. A `Match User`/`Match Group` block can override the global setting, so check those too. Then reload sshd:
+
+```bash
+sudo sshd -t && sudo systemctl reload ssh   # or sshd, depending on distro
+```
+
+## 3. Get around it without changing the server
+
+The server only blocks *forwarding channels*, so you can still run commands over SSH. You can pipe the traffic through a command instead:
+
+```bash
+# On your Mac
+brew install socat
+socat TCP-LISTEN:3000,reuseaddr,fork EXEC:"ssh user@server nc 127.0.0.1 3000"
+```
+
+Then browse to `http://localhost:3000`. Each browser connection starts its own `ssh … nc` process. Set up SSH keys and `ControlMaster` multiplexing in `~/.ssh/config` so it's fast and doesn't prompt for a password every time. The server needs `nc` (netcat) installed. `ssh -W` won't work here because the server blocks it the same way it blocks `-L`.
+
+This won't work if the server uses `ForceCommand` or a restricted shell. If you're bypassing a restriction an admin set on purpose, check that you're allowed to.
+
+## 4. Other ways
+
+- **Connect directly:** start the dev server on `0.0.0.0`, e.g. `vite --host 0.0.0.0` or `next dev -H 0.0.0.0`, and open `http://server-ip:3000`. The firewall has to allow the port, and anyone who can reach it can see your dev server.
+- **Tailscale:** install it on both machines, then use the server's Tailscale IP. This keeps the server off the public internet.
+- **Public tunnel:** run `cloudflared tunnel --url http://localhost:3000` or `ngrok http 3000` on the server and open the URL it prints. This works anywhere, but the URL is public.
+
+If you can't change the server config, option 3 is the fastest. If you'll be doing this regularly, Tailscale is the cleanest setup.

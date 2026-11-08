@@ -1,0 +1,33 @@
+{
+  "identifier" : "B31C5F1E-9C0A-4E6B-9C6C-2E1A54F0BEA1",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "29.00",
+      "familyShareable" : false,
+      "internalID" : "6F1A2B3C",
+      "localizations" : [
+        {
+          "description" : "Lifetime license. 3 devices, Mac included.",
+          "displayName" : "Hostbeam License",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.hostbeam.ios.license",
+      "referenceName" : "Hostbeam License",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

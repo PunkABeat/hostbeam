@@ -1,0 +1,107 @@
+---
+import Guide from "../../layouts/Guide.astro";
+import CopyCommand from "../../components/CopyCommand.tsx";
+
+// Every command here was run against the repo's test host (npm run testhost:up,
+// where sshd has AllowTcpForwarding off) on 2026-10-03: ssh -L was refused with
+// the error quoted below, and the socat relay served the page. Recheck, and
+// bump `updated` in lib/guides.ts, when this changes.
+const FORWARD = "ssh -N -L 5173:localhost:5173 myserver";
+// Too long for a CopyCommand on a phone (assert-no-overflow), so a block.
+const RELAY = `socat TCP-LISTEN:5173,bind=127.0.0.1,reuseaddr,fork \\
+  EXEC:"ssh myserver nc 127.0.0.1 5173"`;
+---
+
+<Guide slug="open-a-remote-dev-server-on-your-mac">
+  <p class="lede">
+    Your agent ran <code class="mono">npm run dev</code> on the server and says the app is at
+    <code class="mono">http://localhost:5173</code>. That's the server's localhost, not your Mac's.
+    To see it in your own browser, you carry that port across your SSH connection.
+  </p>
+
+  <section>
+    <h2>The standard way: ssh -L</h2>
+    <div class="cmd"><CopyCommand command={FORWARD} client:visible /></div>
+    <p>
+      Then open <code class="mono">http://localhost:5173</code> on your Mac. Replace
+      <code class="mono">myserver</code> with the host you SSH into and
+      <code class="mono">5173</code> with the port your agent reported.
+      <code class="mono">-N</code> means no shell, just the tunnel: leave it running while you
+      look, and press <code class="mono">⌃C</code> to close it. Hot reload goes through the same
+      tunnel.
+    </p>
+    <p>
+      Keep the same port number on both sides. The app's links, cookies and sign-in redirects expect
+      it, and a different local port breaks them in ways that look like bugs in the app.
+    </p>
+  </section>
+
+  <section>
+    <h2>When it says “administratively prohibited”</h2>
+    <p>The tunnel starts, but the page doesn't load, and ssh prints:</p>
+    <pre class="term">channel 2: open failed: administratively prohibited: open failed</pre>
+    <p>
+      The server has port forwarding turned off (<code class="mono">AllowTcpForwarding no</code>
+      in its <code class="mono">sshd_config</code>). Hardened servers do this, and it's Alpine
+      Linux's default.
+    </p>
+    <ul>
+      <li>
+        <b>If the server is yours,</b> set <code class="mono">AllowTcpForwarding local</code>,
+        which allows <code class="mono">-L</code> but not <code class="mono">-R</code>, and reload
+        sshd.
+      </li>
+      <li>
+        <b>If it isn't,</b> carry each connection through a command the server already has. With
+        <code class="mono">socat</code> on your Mac (<code class="mono">brew install socat</code>):
+      </li>
+    </ul>
+    <pre class="term">{RELAY}</pre>
+    <p class="aside">
+      Every browser connection opens its own SSH session running <code class="mono">nc</code> on
+      the server. It works, but without <code class="mono">ControlMaster</code> in your ssh config
+      each one pays for a new login, and pages load slowly.
+    </p>
+  </section>
+
+  <section>
+    <h2>Other ways</h2>
+    <ul>
+      <li>
+        <b>VS Code's Remote-SSH</b> forwards a port for you when a dev server starts in its
+        terminal. Handy if you already work in VS Code.
+      </li>
+      <li>
+        <b>Open it to the network.</b> Start the dev server on every address
+        (<code class="mono">--host</code> for Vite) and visit the server's address. On a public
+        server that puts your work in progress on the internet, so do it only on a private network
+        such as Tailscale. Visit it by name rather than IP address and Vite answers “Blocked
+        request. This host is not allowed” until you add the name to
+        <code class="mono">server.allowedHosts</code>.
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>With Hostbeam</h2>
+    <p>
+      Open Hostbeam's menu-bar popover. It asks the current host which ports your SSH user is
+      listening on (your dev servers, not the host's own services) and lists them. Click
+      <b>Open</b>, and the page opens in your browser at <code class="mono">127.0.0.1</code>, on
+      the same port when it's free.
+    </p>
+    <ul>
+      <li>
+        It works where <code class="mono">ssh -L</code> is refused, using
+        <code class="mono">nc</code>, <code class="mono">bash</code> or
+        <code class="mono">perl</code> already on the server. Nothing is installed or left behind.
+      </li>
+      <li>
+        It looks only when you open the popover. While a page is open, one connection stays up,
+        shown in the popover and the menu bar, until you click <b>Stop</b>.
+      </li>
+      <li>The page is reachable from your Mac only, never from your network.</li>
+    </ul>
+    <p>Mac only, in Hostbeam 0.1.33 or later.</p>
+  </section>
+</Guide>

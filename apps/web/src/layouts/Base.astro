@@ -1,0 +1,108 @@
+---
+import "@hostbeam/ui/styles.css";
+import "../styles/landing.css";
+import { componentCss } from "@hostbeam/ui";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Keep the page out of search results and out of sitemap.xml. For pages that
+      only make sense mid-transaction, like the post-checkout thanks page. */
+  noindex?: boolean;
+  /** JSON-LD to embed. Home passes the product graph; other pages pass nothing. */
+  jsonLd?: unknown;
+}
+
+const { title, description, noindex = false, jsonLd } = Astro.props;
+// A real raster card, not the app icon SVG. Twitter/X, Slack, iMessage and
+// LinkedIn all decline to render an SVG og:image, so every link anyone pasted
+// showed a bare, imageless card — on a tool whose whole distribution is one
+// developer sending another a link. Regenerate with docs/marketing/og-card.svg.
+const ogImage = new URL("/assets/og.png", Astro.site ?? Astro.url);
+// Trailing slash included, because that is the URL Astro actually builds
+// (`/pricing/index.html`) and the one the server serves — a canonical that
+// disagrees with the served URL is worse than none.
+const path = Astro.url.pathname;
+const canonical = new URL(path, Astro.site ?? Astro.url);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    {/* Google Search Console's and Bing Webmaster Tools' proof that
+        admin@punkabeat.com owns the site (the https://hostbeam.app/ property
+        in each). Removing one unverifies that property. Meta tags rather than
+        the engines' files, because the asset server redirects .html paths and
+        a file check may not follow. */}
+    <meta name="google-site-verification" content="U4061nYZ-QvItoKz4zoymFM5sqZts2iqc0Ufuki82mw" />
+    <meta name="msvalidate.01" content="13D922B3C32452155B99D1E792FB6D5B" />
+    {/* The page ground in each scheme, so mobile browser chrome matches instead
+        of framing the site in white. */}
+    <meta name="theme-color" content="#f5f8fc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a1424" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Hostbeam" />
+    <meta property="og:locale" content="en" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Hostbeam — Agent on a server? Show it anything. See what it built." />
+    {/* X and Slack read the twitter:* pair; both fall back to og:* but are
+        explicit here so a card cannot half-render. */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="Hostbeam — Agent on a server? Show it anything. See what it built." />
+    {jsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
+    {/* No web font is fetched. Geist is self-hosted by @hostbeam/ui (the same
+        files the Mac app ships) and the monospace face is the system's. The one
+        third-party request on the site is TinyShelf's badge image, on the home
+        page only (Footer.astro, owner's choice 2026-10-09), and /privacy says
+        so; nothing else here may add one without /privacy saying it too. */}
+    {/* The design-system components style themselves by injecting a <style> when
+        they first render, which on a static page happens only once the island
+        hydrates — until then the server-rendered markup carries class names
+        nothing has defined and the hero's Beam button paints as a bare browser
+        control. Shipping the same CSS here means it is styled in the first
+        paint. */}
+    <style is:inline set:html={componentCss}></style>
+    <script is:inline>
+      // Theme = stored override, else the system scheme; applied by toggling
+      // the design system's `.theme-dark` scope on <html> (same contract as
+      // the desktop app's theme.ts). The nav's #theme-toggle flips and stores.
+      (() => {
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        const stored = () => {
+          try { return localStorage.getItem("hb-theme"); } catch { return null; }
+        };
+        const apply = () => {
+          const o = stored();
+          document.documentElement.classList.toggle("theme-dark", o ? o === "dark" : mq.matches);
+        };
+        apply();
+        mq.addEventListener("change", apply);
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest || !e.target.closest("#theme-toggle")) return;
+          const dark = document.documentElement.classList.contains("theme-dark");
+          try { localStorage.setItem("hb-theme", dark ? "light" : "dark"); } catch {}
+          apply();
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

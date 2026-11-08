@@ -1,0 +1,66 @@
+---
+// Where the Mac's "Share to iPhone" QR points (apps/desktop/src/lib/hostPairing.ts).
+// With Hostbeam installed the iPhone never shows this page: the path is a
+// universal link (public/.well-known/apple-app-site-association) and the app
+// opens instead. So whoever reads this is on a phone without the app, or on a
+// computer that followed the link.
+//
+// The host's details are in the fragment, which a browser never sends. This
+// page must never read it either: no script of its own, nothing that echoes
+// `location` (the layout's one inline script only picks the theme), and no
+// analytics beacon on the site — so "hostbeam.app never saw them" stays true.
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.tsx";
+import Footer from "../components/Footer.astro";
+import { Ic } from "@hostbeam/ui";
+import { APP_STORE_URL, IPHONE_APP_LIVE } from "../lib/links";
+---
+
+<Base
+  title="Add a host · Hostbeam"
+  description="A Hostbeam pairing link from the Mac app. On an iPhone with Hostbeam, it opens the app with a server's address filled in."
+  noindex
+>
+  <div class="site" style="display: flex; flex-direction: column; min-height: 100vh">
+    <Nav />
+
+    <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 96px 0">
+      <div class="wrap" style="max-width: 520px">
+        <p class="note">Hostbeam pairing link</p>
+        <h1 class="h2" style="margin-top: 12px">Open this on an iPhone with Hostbeam.</h1>
+        <p class="sub" style="margin: 16px 0 0">
+          This link came from Share to iPhone in Hostbeam on a Mac. On an iPhone with Hostbeam
+          installed, it opens the app with the server's address filled in. Nothing is added until
+          you tap Save.
+        </p>
+
+        {
+          IPHONE_APP_LIVE ? (
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 32px; align-items: flex-start">
+              <a class="btn btn-primary" href={APP_STORE_URL}>
+                <Ic name="smartphone" size={16} /> Get it on the App Store
+              </a>
+              <span class="note">Then scan the code on your Mac again with the Camera app.</span>
+            </div>
+          ) : (
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 32px; align-items: flex-start">
+              <span class="badge-soon">
+                <Ic name="smartphone" size={15} /> Coming soon to the App Store
+              </span>
+              <span class="note" style="max-width: 30em; line-height: 1.6">
+                The iPhone app isn't out yet. Once it is, install it and scan the code again.
+              </span>
+            </div>
+          )
+        }
+
+        <p style="margin: 40px 0 0; color: var(--ink-soft); font-size: 14px; line-height: 1.7">
+          The server's address and user name are in the part of the link after the
+          <code>#</code>. Browsers never send that part, so hostbeam.app never saw them.
+        </p>
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+</Base>

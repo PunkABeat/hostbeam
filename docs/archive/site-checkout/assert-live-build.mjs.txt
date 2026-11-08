@@ -1,0 +1,37 @@
+// Refuses to deploy a build that is not configured for live Paddle.
+//
+// `deploy:web` publishes to hostbeam.app, and checkout config is inlined at
+// BUILD time. Astro/Vite load `.env.production` ahead of `.env` for a
+// production build, so the right thing normally happens — but if
+// `.env.production` is ever missing, renamed, or absent on another machine,
+// `.env` (sandbox) wins silently. checkout.ts then fails closed, so the deploy
+// SUCCEEDS and the live /buy quietly shows "not open yet": no error, no crash,
+// no sales, and nothing to notice until someone tries to pay.
+//
+// Cheap check, expensive failure. Run between build and deploy.
+import { readFileSync } from "node:fs";
+
+const page = "dist/buy/index.html";
+let html;
+try {
+  html = readFileSync(new URL(`../${page}`, import.meta.url), "utf8");
+} catch {
+  fail(`${page} not found — did the build run?`);
+}
+
+const env = html.match(/env = "(\w+)"/)?.[1];
+const hasLiveToken = /"live_[a-z0-9]+"/.test(html);
+const hasTestToken = /"test_[a-z0-9]+"/.test(html);
+
+if (env !== "production") fail(`built with PADDLE_ENV="${env}", expected "production"`);
+if (!hasLiveToken) fail("no live_ client token in the build");
+if (hasTestToken) fail("a sandbox test_ token is present in a live build");
+
+console.log("✓ live build verified: production env, live client token, no sandbox token");
+
+function fail(why) {
+  console.error(`\n✗ refusing to deploy: ${why}`);
+  console.error("  apps/web/.env.production must hold the production block from .env.example.");
+  console.error("  See apps/web/README.md, \"Two environments\".\n");
+  process.exit(1);
+}

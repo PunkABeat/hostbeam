@@ -1,0 +1,9 @@
+# Pattern hosts should not become selectable aliases.
+Host *.internal !blocked jump-?
+  User developer
+
+Host quoted-host "quoted alias" duplicate duplicate
+  HostName example.invalid
+
+host lowercase
+  HostName lowercase.invalid

@@ -1,0 +1,4 @@
+Host root-host
+  HostName root.example
+
+Include included/*.conf

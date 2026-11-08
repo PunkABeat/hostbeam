@@ -1,0 +1,28 @@
+---
+// The post-checkout page (ADR 0014) used to poll the licensing worker for the
+// key the Paddle webhook minted. Licensing is retired (ADR 0031): nobody is
+// sent here any more, but a receipt from before may still link to it, so it
+// stays and says what is true now. Excluded from robots.txt and the sitemap
+// as before.
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Thank you · Hostbeam" description="Hostbeam is free; licenses are no longer sold.">
+  <div class="site" style="min-height: 100vh; display: flex; align-items: center; justify-content: center">
+    <div class="wrap" style="text-align: center; max-width: 480px">
+      <img src="/assets/hostbeam-icon.svg" width="56" height="56" alt="" style="border-radius: 14px" />
+      <h1 class="h2" style="margin-top: 20px">Thank you.</h1>
+      <p class="sub" style="margin: 12px auto 0">
+        Hostbeam no longer sells licenses: every feature is free, with no reminder. If you came
+        here from an older receipt, your key is in your purchase email, and the app has every
+        feature either way.
+      </p>
+      <p style="margin-top: 28px">
+        <a class="btn btn-primary" href="/">Back to hostbeam.app</a>
+      </p>
+      <p style="font-size: 12.5px; color: var(--label-tertiary); margin-top: 28px">
+        Questions: <a href="mailto:support@hostbeam.app" style="color: inherit">support@hostbeam.app</a>.
+      </p>
+    </div>
+  </div>
+</Base>
